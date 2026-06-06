@@ -1,0 +1,173 @@
+<?php
+// ── Home Page Utility Functions ──────────────────────────────────────────────
+
+/**
+ * Truncates a string to a max character length using strlen().
+ */
+function truncate_text(string $text, int $max = 80): string {
+    $text = trim($text); // trim() — remove stray whitespace
+    if (strlen($text) > $max) {
+        return substr($text, 0, $max) . '...';
+    }
+    return $text;
+}
+
+/**
+ * Sanitizes a subtitle: trims it, checks it isn't empty,
+ * and enforces a word-count limit using str_word_count().
+ */
+function sanitize_subtitle(string $text, int $max_words = 15): string {
+    $text = trim($text);
+    if (empty($text)) {
+        return 'Premium tech for the modern lifestyle.';
+    }
+    if (str_word_count($text) > $max_words) {
+        $words = explode(' ', $text);
+        $text  = implode(' ', array_slice($words, 0, $max_words)) . '...';
+    }
+    return $text;
+}
+
+// ── Page Data ────────────────────────────────────────────────────────────────
+
+$hero_subtitle = sanitize_subtitle(
+    'Cutting-edge tech products designed for the modern lifestyle'
+);
+
+$featured_products = [
+    [
+        'name'        => 'TechFlow Monitor',
+        'price'       => '$799',
+        'image'       => 'imgs/image-8.png',
+        'description' => 'Ultra-wide 4K display with 144Hz refresh rate and HDR support for professionals.',
+    ],
+    [
+        'name'        => 'NexHub Pro',
+        'price'       => '$349',
+        'image'       => 'imgs/image-3.png',
+        'description' => 'All-in-one 12-port USB-C hub with 100W power delivery and dual 4K output.',
+    ],
+    [
+        'name'        => 'PowerSync Dock',
+        'price'       => '$249',
+        'image'       => 'imgs/image-4.png',
+        'description' => 'Wireless charging dock with 65W fast charge and multi-device support.',
+    ],
+    [
+        'name'        => 'QuantumDrive Pro',
+        'price'       => '$199',
+        'image'       => 'imgs/image-6.png',
+        'description' => 'Portable NVMe SSD with 2000 MB/s transfer speeds and military-grade encryption.',
+    ],
+];
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXTECH - Premium Tech Products</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">NEXTECH</div>
+            <ul class="nav-menu">
+                <li><a href="index.php"   class="nav-link active">Home</a></li>
+                <li><a href="product.php" class="nav-link">Products</a></li>
+                <li><a href="contact.php" class="nav-link">Contact</a></li>
+                <li><a href="login.php"   class="nav-link">Login</a></li>
+            </ul>
+            <div class="cart-icon">🛒</div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Experience the Future of Technology</h1>
+            <p class="hero-subtitle">
+                <?php echo htmlspecialchars($hero_subtitle); ?>
+                <!-- sanitize_subtitle() used above: trim() + empty() + str_word_count() -->
+            </p>
+            <a href="product.php" class="cta-button">Shop Now</a>
+        </div>
+        <div class="hero-image">
+            <div class="product-showcase">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23f5f5f5' width='400' height='400'/%3E%3Crect x='50' y='80' width='300' height='240' fill='%23333' rx='20'/%3E%3Crect x='60' y='90' width='280' height='200' fill='%23555' rx='15'/%3E%3Ccircle cx='200' cy='190' r='40' fill='%231a1a1a'/%3E%3C/svg%3E"
+                     alt="Premium Tech Product"
+                     class="showcase-img">
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="featured-section">
+        <h2 class="section-title">Featured Collections</h2>
+        
+        <div class="product-grid">
+            <?php foreach ($featured_products as $product): ?>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="<?php echo htmlspecialchars($product['image']); ?>"
+                             alt="<?php echo htmlspecialchars($product['name']); ?>">
+                        <!-- ↑ forward slashes fixed (imgs/image-x.png) -->
+                    </div>
+                    <h3 class="product-name">
+                        <?php echo htmlspecialchars($product['name']); ?>
+                    </h3>
+                    <p class="product-desc">
+                        <?php echo htmlspecialchars(truncate_text($product['description'], 80)); ?>
+                        <!-- ↑ truncate_text() uses trim() + strlen() -->
+                    </p>
+                    <p class="product-price">
+                        <?php echo htmlspecialchars($product['price']); ?>
+                    </p>
+                    <a href="product.php" class="product-btn">View Details</a>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <h2>Discover Our Complete Collection</h2>
+        <p>Browse our curated selection of premium tech products</p>
+        <a href="product.php" class="cta-button-large">Shop All Products</a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>About NEXTECH</h4>
+                <p>Premium technology products for the modern lifestyle.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.php">Home</a></li>
+                    <li><a href="product.php">Products</a></li>
+                    <li><a href="contact.php">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Shipping Info</a></li>
+                    <li><a href="#">Returns</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <!-- date("Y") — always shows the current year automatically -->
+            <p>&copy; <?php echo date("Y"); ?> NEXTECH. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
