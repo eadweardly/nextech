@@ -631,3 +631,131 @@ body {
         font-size: 0.85rem;
     }
 }
+
+/* ============================================
+   DESIGN ENHANCEMENTS — login.css
+   Added on top of existing styles (nothing changed above)
+   ============================================ */
+
+/* Navbar shimmer accent */
+.navbar::after {
+    content: '';
+    display: block;
+    height: 3px;
+    background: linear-gradient(90deg, #1a1a1a 0%, #555 50%, #1a1a1a 100%);
+    background-size: 200% auto;
+    animation: navShimmer 4s linear infinite;
+}
+
+@keyframes navShimmer {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+/* Login section — subtle diagonal pattern background */
+.login-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.login-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(26,26,26,0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+}
+
+/* Login box — entrance animation */
+.login-box {
+    animation: fadeUp 0.45s ease both;
+    position: relative;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Right visual panel — entrance from right */
+.login-visual {
+    animation: fadeLeft 0.5s ease 0.1s both;
+}
+
+@keyframes fadeLeft {
+    from { opacity: 0; transform: translateX(16px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Visual content — decorative dots overlay */
+.visual-content {
+    position: relative;
+    overflow: hidden;
+}
+
+.visual-content::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+    pointer-events: none;
+}
+
+/* Feature icon — circle glow */
+.feature-icon {
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.feature-item:hover .feature-icon {
+    box-shadow: 0 0 0 6px rgba(255,255,255,0.18);
+}
+
+/* Login button — shimmer sweep */
+.login-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.login-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.12), transparent);
+    transition: left 0.5s ease;
+}
+
+.login-button:hover::after {
+    left: 160%;
+}
+
+/* Form inputs — smooth focus ring */
+.form-input:focus {
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.12),
+                0 2px 8px rgba(26,26,26,0.08);
+}
+
+/* Social buttons — icon scale on hover */
+.social-button:hover .social-icon {
+    transform: scale(1.2);
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+/* Footer top accent */
+.footer {
+    position: relative;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #555, transparent);
+}

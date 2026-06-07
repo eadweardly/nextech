@@ -35,39 +35,6 @@ function validate_quantity(mixed $qty): int|false {
     return $qty;
 }
 
-// Handle product image upload
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['product_image']) && isset($_POST['product_id'])) {
-    $product_id = intval($_POST['product_id']);
-    $file = $_FILES['product_image'];
-    $allowed  = ['jpg', 'jpeg', 'png', 'gif'];
-    $filename = trim($file['name']);
-    $ext      = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-
-    if (!in_array($ext, $allowed)) {
-        $message = 'Only image files (jpg, png, gif) are allowed';
-        $message_type = 'error';
-    } elseif ($file['size'] > 5 * 1024 * 1024) {
-        $message = 'Image file is too large (max 5MB)';
-        $message_type = 'error';
-    } else {
-        $unique_name = 'product_' . $product_id . '_' . time() . '.' . $ext;
-        $upload_path = __DIR__ . '/uploads/products/' . $unique_name;
-        if (move_uploaded_file($file['tmp_name'], $upload_path)) {
-            try {
-                $stmt = $conn->prepare("UPDATE products SET image_url = ? WHERE id = ?");
-                $stmt->execute(['/uploads/products/' . $unique_name, $product_id]);
-                $message = 'Product image updated successfully';
-                $message_type = 'success';
-            } catch (PDOException $e) {
-                $message = 'Error updating product image';
-                $message_type = 'error';
-            }
-        } else {
-            $message = 'Error uploading image. Please ensure uploads folder is writable';
-            $message_type = 'error';
-        }
-    }
-}
 
 // Handle add to cart
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
@@ -143,7 +110,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products - NEXTECH</title>
-    <link rel="stylesheet" href="product.css">
+    <link rel="stylesheet" href="css/product.css">
 </head>
 <body>
 
@@ -227,20 +194,7 @@ try {
                             <?php echo htmlspecialchars($product->getBadge()); ?>
                         </div>
 
-                        <div class="image-upload-overlay">
-                            <button class="upload-btn" onclick="document.getElementById('imageInput<?php echo $product_id; ?>').click()">
-                                📷 Change Image
-                            </button>
-                            <form method="POST" enctype="multipart/form-data" style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;">
-                                <input type="file"
-                                       id="imageInput<?php echo $product_id; ?>"
-                                       name="product_image"
-                                       accept="image/*"
-                                       onchange="this.parentForm.submit()"
-                                       style="position: absolute; left: -9999px; opacity: 0; width: 1px; height: 1px;">
-                                <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
-                            </form>
-                        </div>
+
                     </div>
 
                     <div class="product-details">

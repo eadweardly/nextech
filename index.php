@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 // ── Home Page Utility Functions ──────────────────────────────────────────────
 
 /**
@@ -67,7 +69,7 @@ $featured_products = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXTECH - Premium Tech Products</title>
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
 
@@ -79,7 +81,14 @@ $featured_products = [
                 <li><a href="index.php"   class="nav-link active">Home</a></li>
                 <li><a href="product.php" class="nav-link">Products</a></li>
                 <li><a href="contact.php" class="nav-link">Contact</a></li>
-                <li><a href="login.php"   class="nav-link">Login</a></li>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <li class="nav-user">
+                        <span class="nav-username">👤 <?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                        <a href="logout.php" class="nav-link nav-logout">Logout</a>
+                    </li>
+                <?php else: ?>
+                    <li><a href="login.php" class="nav-link">Login</a></li>
+                <?php endif; ?>
             </ul>
             <div class="cart-icon">🛒</div>
         </div>

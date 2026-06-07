@@ -491,3 +491,107 @@ body {
         padding: var(--spacing-sm) var(--spacing-md);
     }
 }
+/* ============================================
+   DESIGN ENHANCEMENTS — index.css
+   Added on top of existing styles (nothing changed above)
+   ============================================ */
+
+/* Subtle animated gradient accent line under navbar */
+.navbar::after {
+    content: '';
+    display: block;
+    height: 3px;
+    background: linear-gradient(90deg, #1a1a1a 0%, #555 50%, #1a1a1a 100%);
+    background-size: 200% auto;
+    animation: navShimmer 4s linear infinite;
+}
+
+@keyframes navShimmer {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+/* Hero section — soft radial glow behind the showcase */
+.hero {
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(26,26,26,0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Product showcase — floating animation */
+.product-showcase {
+    animation: floatShowcase 5s ease-in-out infinite;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+}
+
+@keyframes floatShowcase {
+    0%, 100% { transform: translateY(0px);  }
+    50%       { transform: translateY(-10px); }
+}
+
+/* Product card — image zoom on hover */
+.product-card .product-image img {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.07);
+}
+
+/* CTA section — decorative dots pattern overlay */
+.cta-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+}
+
+/* Section title — underline accent */
+.section-title {
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: var(--primary-grey);
+    margin: 0.6rem auto 0;
+    border-radius: 2px;
+}
+
+/* Footer — subtle top gradient border */
+.footer {
+    border-top: 3px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #555, transparent);
+}
