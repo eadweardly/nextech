@@ -40,25 +40,25 @@ $featured_products = [
     [
         'name'        => 'TechFlow Monitor',
         'price'       => '$799',
-        'image'       => 'imgs/image-8.png',
+        'image'       => 'images/monitor.png',
         'description' => 'Ultra-wide 4K display with 144Hz refresh rate and HDR support for professionals.',
     ],
     [
         'name'        => 'NexHub Pro',
         'price'       => '$349',
-        'image'       => 'imgs/image-3.png',
+        'image'       => 'images/hub.png',
         'description' => 'All-in-one 12-port USB-C hub with 100W power delivery and dual 4K output.',
     ],
     [
         'name'        => 'PowerSync Dock',
         'price'       => '$249',
-        'image'       => 'imgs/image-4.png',
+        'image'       => 'images/dock.png',
         'description' => 'Wireless charging dock with 65W fast charge and multi-device support.',
     ],
     [
         'name'        => 'QuantumDrive Pro',
         'price'       => '$199',
-        'image'       => 'imgs/image-6.png',
+        'image'       => 'images/mouse.png',
         'description' => 'Portable NVMe SSD with 2000 MB/s transfer speeds and military-grade encryption.',
     ],
 ];
