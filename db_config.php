@@ -62,7 +62,7 @@ try {
         'NexChill Pro 360 Liquid Cooler',
         'Triple-fan 360mm AIO liquid cooler with LCD temperature display, copper cold plate, high-density radiator, and PWM smart control. Handles up to 350W TDP. Compatible with Intel LGA1700 and AMD AM5/AM4.',
         149.99,
-        'images/cooling.png',
+        'images/cooling1.png',
         'PC Components & GPUs',
         25
     ],
@@ -70,7 +70,7 @@ try {
         'NexDock Pro 100W Docking Station',
         'Premium docking station with 100W power delivery, dual 4K display output via HDMI and DisplayPort, Gigabit Ethernet, 10Gbps USB-C, SD/TF card slots, and 3.5mm audio jack. Works on Windows, macOS, and ChromeOS.',
         129.99,
-        'images/dock.png',
+        'images/dock1.png',
         'Laptops & Monitors',
         30
     ],
@@ -78,7 +78,7 @@ try {
         'NexHub Wireless 10-Port USB-C Hub',
         'Advanced 10-port wireless USB-C hub with 40Gbps data transfer per port, 100W power delivery pass-through, 8K@60Hz display support, and built-in wireless charging pad.',
         199.99,
-        'images/hub.png',
+        'images/hub1.png',
         'PC Components & GPUs',
         20
     ],
@@ -86,7 +86,7 @@ try {
         'NexView 32" 4K Ultra HD Display',
         '32-inch 4K IPS professional monitor with 3840x2160 resolution, 10-bit color, 100% sRGB, 350 nits brightness, USB-C 65W power delivery, HDMI 2.0, and DisplayPort 1.4. Height adjustable ergonomic stand included.',
         499.99,
-        'images/monitor.png',
+        'images/monitor1.png',
         'Laptops & Monitors',
         15
     ],
@@ -94,7 +94,7 @@ try {
         'NexTrack AI Wireless Mouse',
         'Ergonomic wireless mouse with AI tracking technology, 26,000 DPI precision sensor, dual connectivity via 2.4GHz and Bluetooth 5.2, 6 programmable buttons, silent clicks, and 90-day battery life.',
         89.99,
-        'images/mouse.png',
+        'images/mouse1.png',
         'Gaming Peripherals',
         50
     ],
@@ -102,7 +102,7 @@ try {
         'NexGlow RGB Gaming Setup',
         'Complete RGB ambient lighting kit with modular hexagonal wall panels and LED strip lights. Fully customizable colors and effects to transform any gaming battlestation.',
         79.99,
-        'images/rgblights.png',
+        'images/rgblights1.png',
         'Gaming Peripherals',
         40
     ],
@@ -118,7 +118,7 @@ try {
         'NexDrive 2TB NVMe SSD',
         'High-performance PCIe 4.0 x4 NVMe 1.4 SSD with 7400MB/s read and 6500MB/s write speeds, 3D NAND technology, S.M.A.R.T. support, advanced thermal control, and a 5-year warranty.',
         109.99,
-        'images/ssd.png',
+        'images/ssd2.png',
         'PC Components & GPUs',
         45
     ],

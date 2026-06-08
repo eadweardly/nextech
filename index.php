@@ -38,28 +38,28 @@ $hero_subtitle = sanitize_subtitle(
 
 $featured_products = [
     [
-        'name'        => 'TechFlow Monitor',
-        'price'       => '$799',
-        'image'       => 'images/monitor.png',
+        'name'        => 'NexView 32" 4K Ultra HD Display',
+        'price'       => '$499.99',
+        'image'       => 'images/monitor1.png',
         'description' => 'Ultra-wide 4K display with 144Hz refresh rate and HDR support for professionals.',
     ],
     [
-        'name'        => 'NexHub Pro',
-        'price'       => '$349',
-        'image'       => 'images/hub.png',
-        'description' => 'All-in-one 12-port USB-C hub with 100W power delivery and dual 4K output.',
+        'name'        => 'NexHub Wireless 10-Port USB-C Hub',
+        'price'       => '$199.99',
+        'image'       => 'images/hub1.png',
+        'description' => 'All-in-one 10-port USB-C hub with 100W power delivery and dual 4K output.',
     ],
     [
-        'name'        => 'PowerSync Dock',
-        'price'       => '$249',
-        'image'       => 'images/dock.png',
+        'name'        => 'NexDock Pro 100W Docking Station',
+        'price'       => '$129.99',
+        'image'       => 'images/dock1.png',
         'description' => 'Wireless charging dock with 65W fast charge and multi-device support.',
     ],
     [
-        'name'        => 'QuantumDrive Pro',
-        'price'       => '$199',
-        'image'       => 'images/mouse.png',
-        'description' => 'Portable NVMe SSD with 2000 MB/s transfer speeds and military-grade encryption.',
+        'name'        => 'NexTrack AI Wireless Mouse',
+        'price'       => '$89.99',
+        'image'       => 'images/mouse1.png',
+        'description' => 'Ergonomic wireless mouse with AI tracking technology, 26,000 DPI precision sensor, dual connectivity via 2.4GHz and Bluetooth 5.2, 6 programmable buttons, silent clicks, and 90-day battery life.',
     ],
 ];
 ?>
