@@ -1,9 +1,11 @@
 <?php
 
-class Product {
-    
-    // ────────────────────────────────────────────────────────────────────────────
-    // ────────────────────────────────────────────────────────────────────────────
+interface Priceable {
+    public function getFormattedPrice(): string;
+    public function getDiscountedPrice(): float;
+}
+
+abstract class AbstractProduct implements Priceable {
     protected int $id;
     protected string $name;
     protected string $description;
@@ -12,10 +14,7 @@ class Product {
     protected string $category;
     protected int $stock;
     protected string $created_at;
-    
-    
-    // ────────────────────────────────────────────────────────────────────────────
-    // ────────────────────────────────────────────────────────────────────────────
+
     public function __construct(
         int $id = 0,
         string $name = '',
@@ -35,26 +34,11 @@ class Product {
         $this->stock       = $stock;
         $this->created_at  = $created_at;
     }
-    
-    
-    // ────────────────────────────────────────────────────────────────────────────
-    // ────────────────────────────────────────────────────────────────────────────
+
     public function __toString(): string {
         return $this->name;
     }
-    
-    
-    // ────────────────────────────────────────────────────────────────────────────
-    // ────────────────────────────────────────────────────────────────────────────
-    public function __clone() {
-        // When cloning, reset ID (as if it's a new product)
-        $this->id = 0;
-        $this->name = "Copy of " . $this->name;
-    }
-    
-    
-    // ────────────────────────────────────────────────────────────────────────────
-    // ────────────────────────────────────────────────────────────────────────────
+
     public function __get(string $property) {
         if (property_exists($this, $property)) {
             return $this->$property;
@@ -62,16 +46,12 @@ class Product {
         trigger_error("Property '$property' does not exist", E_USER_WARNING);
         return null;
     }
-    
-    
-    // ────────────────────────────────────────────────────────────────────────────
-    // ────────────────────────────────────────────────────────────────────────────
+
     public function __set(string $property, $value) {
         if (!property_exists($this, $property)) {
             trigger_error("Property '$property' does not exist", E_USER_WARNING);
             return;
         }
-        
         switch ($property) {
             case 'name':
                 $value = trim($value);
@@ -95,101 +75,48 @@ class Product {
                 }
                 break;
         }
-        
         $this->$property = $value;
     }
-    
-    
-    // ────────────────────────────────────────────────────────────────────────────
-    // ────────────────────────────────────────────────────────────────────────────
-    
-    /**
-     * Get formatted price for display
-     */
+
+    public function __clone() {
+        $this->id   = 0;
+        $this->name = "Copy of " . $this->name;
+    }
+
     public function getFormattedPrice(): string {
         return '$' . number_format($this->price, 2);
     }
-    
-    
-    /**
-     * Get product badge based on price (Value/Popular/Premium)
-     */
-    public function getBadge(): string {
-        if ($this->price < 100) return 'Value';
-        if ($this->price < 300) return 'Popular';
-        return 'Premium';
+
+    public function getDiscountedPrice(): float {
+        return $this->price;
     }
-    
-    
-    /**
-     * Get truncated description
-     */
-    public function getTruncatedDescription(int $length = 120): string {
-        if (empty($this->description)) {
-            return 'No description available.';
+
+    public function getImage(): string {
+        if (!empty($this->image)) {
+            return $this->image;
         }
+        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23f5f5f5'/%3E%3Crect x='30' y='50' width='140' height='100' fill='%23333' rx='8'/%3E%3Crect x='40' y='60' width='120' height='80' fill='%23555' rx='4'/%3E%3Ccircle cx='100' cy='100' r='20' fill='%231a1a1a'/%3E%3C/svg%3E";
+    }
+
+    public function getTruncatedDescription(int $length = 120): string {
+        if (empty($this->description)) return 'No description available.';
         if (strlen($this->description) > $length) {
             return substr($this->description, 0, $length) . '...';
         }
         return $this->description;
     }
-    
-    
-    /**
-     * Get product image URL with fallback to inline SVG placeholder.
-     * Admin image upload will replace this via future admin panel.
-     */
-    public function getImage(): string {
-        if (!empty($this->image)) {
-            return $this->image;
-        }
-        // SVG placeholder shown until admin sets a real image
-        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23f5f5f5'/%3E%3Crect x='30' y='50' width='140' height='100' fill='%23333' rx='8'/%3E%3Crect x='40' y='60' width='120' height='80' fill='%23555' rx='4'/%3E%3Ccircle cx='100' cy='100' r='20' fill='%231a1a1a'/%3E%3C/svg%3E";
-    }
 
-
-    /**
-     * Get formatted creation date using strtotime() + date()
-     */
     public function getFormattedDate(): string {
-        if (empty($this->created_at)) {
-            return '';
-        }
+        if (empty($this->created_at)) return '';
         $timestamp = strtotime($this->created_at);
-        if ($timestamp === false) {
-            return '';
-        }
+        if ($timestamp === false) return '';
         return date('M j, Y', $timestamp);
     }
-    
-    
-    /**
-     * Check if product is in stock
-     */
+
     public function isInStock(): bool {
         return $this->stock > 0;
     }
-    
-    
-    /**
-     * Check if product matches a search keyword
-     */
-    public function matchesSearch(string $keyword): bool {
-        $keyword = trim($keyword);
-        if (empty($keyword)) return true;
-        
-        $keyword_lower = strtolower($keyword);
-        $name_lower    = strtolower($this->name);
-        $desc_lower    = strtolower($this->description);
-        
-        return strpos($name_lower, $keyword_lower) !== false
-            || strpos($desc_lower, $keyword_lower) !== false;
-    }
-    
-    
-    /**
-     * Get all properties as associative array
-     */
+
     public function toArray(): array {
         return [
             'id'          => $this->id,
@@ -201,6 +128,48 @@ class Product {
             'stock'       => $this->stock,
             'created_at'  => $this->created_at,
         ];
+    }
+
+    abstract public function getBadge(): string;
+}
+
+class Product extends AbstractProduct {
+
+    public function getBadge(): string {
+        if ($this->price < 100) return 'Value';
+        if ($this->price < 300) return 'Popular';
+        return 'Premium';
+    }
+
+    public static function fromArray(array $row): self {
+        return new self(
+            (int)($row['id'] ?? 0),
+            $row['name'] ?? '',
+            $row['description'] ?? '',
+            (float)($row['price'] ?? 0.0),
+            $row['image_url'] ?? $row['image'] ?? '',
+            $row['category'] ?? '',
+            (int)($row['stock'] ?? 0),
+            $row['created_at'] ?? ''
+        );
+    }
+
+    public static function getCategories(): array {
+        return [
+            'PC Components & GPUs',
+            'Laptops & Monitors',
+            'Gaming Peripherals',
+            'Smartphones & Accessories',
+            'Audio & Headphones',
+        ];
+    }
+
+    public function matchesSearch(string $keyword): bool {
+        $keyword = trim($keyword);
+        if (empty($keyword)) return true;
+        $keyword_lower = strtolower($keyword);
+        return strpos(strtolower($this->name), $keyword_lower) !== false
+            || strpos(strtolower($this->description), $keyword_lower) !== false;
     }
 }
 ?>
