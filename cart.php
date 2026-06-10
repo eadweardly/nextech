@@ -2,7 +2,6 @@
 session_start();
 require_once 'db_config.php';
 
-// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -12,7 +11,6 @@ $user_id = $_SESSION['user_id'];
 $message = '';
 $message_type = '';
 
-// Handle remove from cart
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_item'])) {
     try {
         $cart_id = intval($_POST['cart_id']);
@@ -27,13 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_item'])) {
     }
 }
 
-// Handle update quantity
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_quantity'])) {
     try {
-        $cart_id = intval($_POST['cart_id']);
+        $cart_id  = intval($_POST['cart_id']);
         $quantity = intval($_POST['quantity']);
-        
-        if ($quantity > 0) {
+        if ($quantity > 0 && $quantity <= 100) {
             $stmt = $conn->prepare("UPDATE cart SET quantity = ? WHERE id = ? AND user_id = ?");
             $stmt->execute([$quantity, $cart_id, $user_id]);
             $message = 'Quantity updated';
@@ -45,20 +41,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_quantity'])) {
     }
 }
 
-// Fetch cart items
-$cart_items = [];
+$cart_items  = [];
 $total_price = 0;
 
 try {
     $stmt = $conn->prepare("
-        SELECT c.id, c.quantity, p.id as product_id, p.name, p.price, p.description 
-        FROM cart c 
-        JOIN products p ON c.product_id = p.id 
+        SELECT c.id, c.quantity, p.id as product_id, p.name, p.price, p.description
+        FROM cart c
+        JOIN products p ON c.product_id = p.id
         WHERE c.user_id = ?
     ");
     $stmt->execute([$user_id]);
     $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     foreach ($cart_items as $item) {
         $total_price += $item['price'] * $item['quantity'];
     }
@@ -66,6 +61,10 @@ try {
     $message = 'Error loading cart items';
     $message_type = 'error';
 }
+
+$shipping = $total_price >= 100 ? 0.00 : 9.99;
+$tax      = $total_price * 0.08;
+$total    = $total_price + $shipping + $tax;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -76,7 +75,7 @@ try {
     <link rel="stylesheet" href="css/cart.css">
 </head>
 <body>
-    <!-- Navigation Bar -->
+
     <nav class="navbar">
         <div class="navbar-container">
             <div class="logo">NEXTECH</div>
@@ -91,13 +90,11 @@ try {
         </div>
     </nav>
 
-    <!-- Page Header -->
     <section class="page-header">
         <h1>Shopping Cart</h1>
         <p>Review and manage your items</p>
     </section>
 
-    <!-- Message Display -->
     <?php if ($message): ?>
         <div class="message message-<?php echo $message_type; ?>">
             <?php echo htmlspecialchars($message); ?>
@@ -107,7 +104,7 @@ try {
     <section class="cart-section">
         <div class="cart-container">
             <?php if (count($cart_items) > 0): ?>
-                <!-- Cart Items -->
+
                 <div class="cart-items">
                     <h2 class="cart-title">Cart Items (<?php echo count($cart_items); ?>)</h2>
                     <div class="items-list">
@@ -146,7 +143,6 @@ try {
                     </div>
                 </div>
 
-                <!-- Cart Summary -->
                 <div class="cart-summary">
                     <h3>Order Summary</h3>
                     <div class="summary-row">
@@ -155,21 +151,21 @@ try {
                     </div>
                     <div class="summary-row">
                         <span>Shipping</span>
-                        <span>$9.99</span>
+                        <span><?php echo $shipping == 0 ? 'Free' : '$' . number_format($shipping, 2); ?></span>
                     </div>
                     <div class="summary-row">
-                        <span>Tax</span>
-                        <span>$<?php echo number_format($total_price * 0.08, 2); ?></span>
+                        <span>Tax (8%)</span>
+                        <span>$<?php echo number_format($tax, 2); ?></span>
                     </div>
                     <div class="summary-row total">
                         <span>Total</span>
-                        <span>$<?php echo number_format($total_price + 9.99 + ($total_price * 0.08), 2); ?></span>
+                        <span>$<?php echo number_format($total, 2); ?></span>
                     </div>
-                    <button class="checkout-btn">Proceed to Checkout</button>
+                    <a href="checkout.php" class="checkout-btn" style="display:block; text-align:center; text-decoration:none;">Proceed to Checkout</a>
                     <a href="product.php" class="continue-shopping">Continue Shopping</a>
                 </div>
+
             <?php else: ?>
-                <!-- Empty Cart -->
                 <div class="empty-cart">
                     <div class="empty-icon">🛒</div>
                     <h2>Your Cart is Empty</h2>
@@ -180,7 +176,6 @@ try {
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -205,40 +200,22 @@ try {
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 NEXTECH. All rights reserved.</p>
+            <p>&copy; <?php echo date("Y"); ?> NEXTECH. All rights reserved.</p>
         </div>
     </footer>
 
     <script>
-        /**
-         * Browser Session Cart Logic
-         * 
-         * sessionStorage is cleared automatically when the entire browser closes.
-         * It persists across tab refreshes and new tabs opened within the same session.
-         *
-         * Flow:
-         *  - First load in a new browser session → no token in sessionStorage
-         *    → call clear_cart.php to wipe the DB cart → set the token
-         *  - Subsequent loads (same browser session, new tabs, refreshes)
-         *    → token already exists → skip clearing
-         */
         (function () {
             const SESSION_KEY = 'nextech_browser_session';
-
             if (!sessionStorage.getItem(SESSION_KEY)) {
-                // Fresh browser open — clear the cart on the server first,
-                // then mark this browser session as active.
                 fetch('clear_cart.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // Credentials ensures the PHP session cookie is sent along
                     credentials: 'same-origin'
                 })
                 .then(function (res) {
                     if (res.ok) {
-                        // Mark session so subsequent loads don't clear again
                         sessionStorage.setItem(SESSION_KEY, '1');
-                        // Reload the page so the now-empty cart is reflected
                         window.location.reload();
                     }
                 })
@@ -248,5 +225,6 @@ try {
             }
         })();
     </script>
+
 </body>
 </html>
