@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS product_variants (
     product_id INT NOT NULL,
     variant_price DECIMAL(10,2) NOT NULL,
     variant_description VARCHAR(100) NOT NULL,
+    var_stock INT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
@@ -34,11 +35,13 @@ CREATE TABLE IF NOT EXISTS cart (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     product_id INT NOT NULL,
+    variant_id INT DEFAULT NULL,
     quantity INT NOT NULL DEFAULT 1,
     added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_cart_item (user_id, product_id)
+    FOREIGN KEY (variant_id) REFERENCES product_variants(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_cart_item (user_id, product_id, variant_id)
 );
 
 CREATE TABLE IF NOT EXISTS delivery_address (
@@ -124,12 +127,12 @@ INSERT INTO products (name, description, price, image_url, category, stock) VALU
 ('NexSound 360 Bluetooth Speaker', 'Premium cylindrical Bluetooth 5.3 speaker delivering 360 degree omnidirectional sound with 30W RMS output, deep bass drivers, 20-hour battery life, IPX6 water resistance, and USB-C charging.', 99.99, 'images/speaker.png', 'Audio & Headphones', 35),
 ('NexDrive 2TB NVMe SSD', 'High-performance PCIe 4.0 x4 NVMe 1.4 SSD with 7400MB/s read and 6500MB/s write speeds, 3D NAND technology, S.M.A.R.T. support, advanced thermal control, and a 5-year warranty.', 109.99, 'images/ssd2.png', 'PC Components & GPUs', 45);
 
-INSERT INTO product_variants (product_id, variant_price, variant_description) VALUES
-(1, 159.99, '420mm Radiator'),
-(1, 179.99, '420mm Radiator + Extra Fan Kit'),
-(2, 149.99, 'With Extra HDMI Cable'),
-(3, 219.99, 'With Wireless Charging Pad Upgrade'),
-(4, 549.99, 'With Wall Mount Kit'),
-(5, 99.99, 'With Extended Warranty'),
-(7, 119.99, 'With Charging Dock'),
-(8, 139.99, '4TB Variant');
+INSERT INTO product_variants (product_id, variant_price, variant_description, var_stock) VALUES
+(1, 159.99, '420mm Radiator', 15),
+(1, 179.99, '420mm Radiator + Extra Fan Kit', 10),
+(2, 149.99, 'With Extra HDMI Cable', 12),
+(3, 219.99, 'With Wireless Charging Pad Upgrade', 8),
+(4, 549.99, 'With Wall Mount Kit', 6),
+(5, 99.99, 'With Extended Warranty', 20),
+(7, 119.99, 'With Charging Dock', 14),
+(8, 139.99, '4TB Variant', 10);

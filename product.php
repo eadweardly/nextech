@@ -5,6 +5,7 @@
 
 session_start();
 require_once 'db_config.php';
+require_once 'product_class.php';
 require_once 'autoload.php';
 
 /** @var Product $product */
@@ -35,8 +36,41 @@ function validate_quantity(mixed $qty): int|false {
     return $qty;
 }
 
+// Handle product image upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['product_image']) && isset($_POST['product_id'])) {
+    $product_id = intval($_POST['product_id']);
+    $file = $_FILES['product_image'];
+    $allowed  = ['jpg', 'jpeg', 'png', 'gif'];
+    $filename = trim($file['name']);
+    $ext      = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-// Handle add to cart
+    if (!in_array($ext, $allowed)) {
+        $message = 'Only image files (jpg, png, gif) are allowed';
+        $message_type = 'error';
+    } elseif ($file['size'] > 5 * 1024 * 1024) {
+        $message = 'Image file is too large (max 5MB)';
+        $message_type = 'error';
+    } else {
+        $unique_name = 'product_' . $product_id . '_' . time() . '.' . $ext;
+        $upload_path = __DIR__ . '/uploads/products/' . $unique_name;
+        if (move_uploaded_file($file['tmp_name'], $upload_path)) {
+            try {
+                $stmt = $conn->prepare("UPDATE products SET image_url = ? WHERE id = ?");
+                $stmt->execute(['/uploads/products/' . $unique_name, $product_id]);
+                $message = 'Product image updated successfully';
+                $message_type = 'success';
+            } catch (PDOException $e) {
+                $message = 'Error updating product image';
+                $message_type = 'error';
+            }
+        } else {
+            $message = 'Error uploading image. Please ensure uploads folder is writable';
+            $message_type = 'error';
+        }
+    }
+}
+
+// Handle add to cart (with optional variant)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
     if (!isset($_SESSION['user_id'])) {
         $message = 'Please login to add items to cart';
@@ -48,13 +82,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
             $quantity   = validate_quantity($_POST['quantity'] ?? 1);
             if ($quantity === false) $quantity = 1;
 
+            $variant_id = isset($_POST['variant_id']) && $_POST['variant_id'] !== ''
+                ? intval($_POST['variant_id'])
+                : null;
+
             $stmt = $conn->prepare("SELECT id FROM products WHERE id = ?");
             $stmt->execute([$product_id]);
             $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($product) {
-                $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
-                $stmt->execute([$user_id, $product_id]);
+                if ($variant_id === null) {
+                    $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND variant_id IS NULL");
+                    $stmt->execute([$user_id, $product_id]);
+                } else {
+                    $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND variant_id = ?");
+                    $stmt->execute([$user_id, $product_id, $variant_id]);
+                }
                 $cart_item = $stmt->fetch(PDO::FETCH_ASSOC);
 
                 if ($cart_item) {
@@ -64,8 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
                     $message = 'Product quantity updated in cart';
                     $message_type = 'success';
                 } else {
-                    $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
-                    $stmt->execute([$user_id, $product_id, $quantity]);
+                    $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, variant_id, quantity) VALUES (?, ?, ?, ?)");
+                    $stmt->execute([$user_id, $product_id, $variant_id, $quantity]);
                     $message = 'Product added to cart successfully';
                     $message_type = 'success';
                 }
@@ -82,6 +125,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
 
 // Fetch products and convert to OOP objects
 $productObjects = [];
+$variantsByProduct = [];
+
 try {
     $result = $conn->query("SELECT * FROM products ORDER BY created_at DESC");
     $products_data = $result->fetchAll(PDO::FETCH_ASSOC);
@@ -98,11 +143,17 @@ try {
         );
         $productObjects[] = $product;
     }
+
+    // Fetch all variants grouped by product_id
+    $variant_result = $conn->query("SELECT * FROM product_variants ORDER BY variant_price ASC");
+    $variants_data = $variant_result->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($variants_data as $v) {
+        $variantsByProduct[$v['product_id']][] = $v;
+    }
 } catch (PDOException $e) {
     $message = 'Error loading products: ' . $e->getMessage();
     $message_type = 'error';
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -111,6 +162,25 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products - NEXTECH</title>
     <link rel="stylesheet" href="css/product.css">
+    <style>
+        .variant-select {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border-grey);
+            border-radius: var(--radius);
+            background-color: #ffffff;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+        }
+
+        .variant-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+    </style>
 </head>
 <body>
 
@@ -121,6 +191,8 @@ try {
                 <li><a href="index.php" class="nav-link">Home</a></li>
                 <li><a href="product.php" class="nav-link active">Products</a></li>
                 <li><a href="contact.php" class="nav-link">Contact</a></li>
+                <li><a href="feedback.php" class="nav-link">Feedback</a></li>
+                <li><a href="concerns.php" class="nav-link">Concerns</a></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <li><a href="cart.php" class="nav-link">Cart</a></li>
                     <li><a href="logout.php" class="nav-link">Logout (<?php echo htmlspecialchars($_SESSION['username']); ?>)</a></li>
@@ -144,7 +216,6 @@ try {
             <?php echo htmlspecialchars($message); ?>
         </div>
     <?php endif; ?>
-
 
     <section class="filter-section">
         <div class="filter-container">
@@ -180,6 +251,7 @@ try {
                     $product_id       = $product->__get('id');
                     $product_category = $product->__get('category');
                     $product_price    = $product->__get('price');
+                    $variants         = $variantsByProduct[$product_id] ?? [];
                 ?>
                 <div class="product-item"
                      data-category="<?php echo htmlspecialchars($product_category); ?>"
@@ -194,7 +266,19 @@ try {
                             <?php echo htmlspecialchars($product->getBadge()); ?>
                         </div>
 
-
+                        <div class="image-upload-overlay">
+                            <button class="upload-btn" onclick="document.getElementById('imageInput<?php echo $product_id; ?>').click()">
+                                📷 Change Image
+                            </button>
+                            <form method="POST" enctype="multipart/form-data" style="display: none;">
+                                <input type="file"
+                                       id="imageInput<?php echo $product_id; ?>"
+                                       name="product_image"
+                                       accept="image/*"
+                                       onchange="this.parentForm.submit()">
+                                <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
+                            </form>
+                        </div>
                     </div>
 
                     <div class="product-details">
@@ -213,20 +297,33 @@ try {
 
                         <p class="product-date">Added: <?php echo htmlspecialchars($product->getFormattedDate()); ?></p>
 
-                        <div class="product-footer">
+                        <div class="product-footer" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
                             <span class="product-cost">
                                 <?php echo $product->getFormattedPrice(); ?>
                             </span>
+
                             <?php if (isset($_SESSION['user_id'])): ?>
-                                <form method="POST" style="display: inline;">
+                                <form method="POST" style="display: flex; flex-direction: column;">
                                     <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
                                     <input type="hidden" name="quantity" value="1">
+
+                                    <?php if (!empty($variants)): ?>
+                                        <select name="variant_id" class="variant-select">
+                                            <option value="">Standard — <?php echo $product->getFormattedPrice(); ?></option>
+                                            <?php foreach ($variants as $v): ?>
+                                                <option value="<?php echo $v['id']; ?>">
+                                                    <?php echo htmlspecialchars($v['variant_description']); ?> — $<?php echo number_format($v['variant_price'], 2); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    <?php endif; ?>
+
                                     <button type="submit" name="add_to_cart" class="add-to-cart-btn" <?php echo !$product->isInStock() ? 'disabled' : ''; ?>>
                                         <?php echo $product->isInStock() ? 'Add to Cart' : 'Out of Stock'; ?>
                                     </button>
                                 </form>
                             <?php else: ?>
-                                <a href="login.php" class="add-to-cart-btn">Login to Buy</a>
+                                <a href="login.php" class="add-to-cart-btn" style="text-align:center;">Login to Buy</a>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -295,8 +392,8 @@ try {
             <div class="footer-section">
                 <h4>Support</h4>
                 <ul>
-                    <li><a href="#">Shipping Info</a></li>
-                    <li><a href="#">Returns</a></li>
+                    <li><a href="feedback.php">Feedback</a></li>
+                    <li><a href="concerns.php">Concerns</a></li>
                     <li><a href="#">FAQ</a></li>
                 </ul>
             </div>

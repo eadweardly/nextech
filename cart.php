@@ -46,16 +46,20 @@ $total_price = 0;
 
 try {
     $stmt = $conn->prepare("
-        SELECT c.id, c.quantity, p.id as product_id, p.name, p.price, p.description
+        SELECT c.id, c.quantity, c.variant_id,
+               p.id as product_id, p.name, p.price, p.description,
+               pv.variant_price, pv.variant_description
         FROM cart c
         JOIN products p ON c.product_id = p.id
+        LEFT JOIN product_variants pv ON c.variant_id = pv.id
         WHERE c.user_id = ?
     ");
     $stmt->execute([$user_id]);
     $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($cart_items as $item) {
-        $total_price += $item['price'] * $item['quantity'];
+        $effective_price = $item['variant_id'] ? (float)$item['variant_price'] : (float)$item['price'];
+        $total_price += $effective_price * $item['quantity'];
     }
 } catch (PDOException $e) {
     $message = 'Error loading cart items';
@@ -83,6 +87,8 @@ $total    = $total_price + $shipping + $tax;
                 <li><a href="index.php" class="nav-link">Home</a></li>
                 <li><a href="product.php" class="nav-link">Products</a></li>
                 <li><a href="contact.php" class="nav-link">Contact</a></li>
+                <li><a href="feedback.php" class="nav-link">Feedback</a></li>
+                <li><a href="concerns.php" class="nav-link">Concerns</a></li>
                 <li><a href="cart.php" class="nav-link active">Cart</a></li>
                 <li><a href="logout.php" class="nav-link">Logout (<?php echo htmlspecialchars($_SESSION['username']); ?>)</a></li>
             </ul>
@@ -109,6 +115,9 @@ $total    = $total_price + $shipping + $tax;
                     <h2 class="cart-title">Cart Items (<?php echo count($cart_items); ?>)</h2>
                     <div class="items-list">
                         <?php foreach ($cart_items as $item): ?>
+                            <?php
+                                $effective_price = $item['variant_id'] ? (float)$item['variant_price'] : (float)$item['price'];
+                            ?>
                             <div class="cart-item">
                                 <div class="item-image">
                                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -120,9 +129,14 @@ $total    = $total_price + $shipping + $tax;
                                 </div>
                                 <div class="item-details">
                                     <h3><?php echo htmlspecialchars($item['name']); ?></h3>
+                                    <?php if ($item['variant_id']): ?>
+                                        <p style="color: var(--accent); font-weight: 600; margin-bottom: 0.25rem;">
+                                            Variant: <?php echo htmlspecialchars($item['variant_description']); ?>
+                                        </p>
+                                    <?php endif; ?>
                                     <p><?php echo htmlspecialchars($item['description']); ?></p>
                                     <div class="item-meta">
-                                        <span class="item-price">$<?php echo number_format($item['price'], 2); ?></span>
+                                        <span class="item-price">$<?php echo number_format($effective_price, 2); ?></span>
                                         <form method="POST" class="quantity-form">
                                             <input type="hidden" name="cart_id" value="<?php echo $item['id']; ?>">
                                             <label for="qty-<?php echo $item['id']; ?>">Qty:</label>
@@ -132,7 +146,7 @@ $total    = $total_price + $shipping + $tax;
                                     </div>
                                 </div>
                                 <div class="item-total">
-                                    <p>$<?php echo number_format($item['price'] * $item['quantity'], 2); ?></p>
+                                    <p>$<?php echo number_format($effective_price * $item['quantity'], 2); ?></p>
                                     <form method="POST" class="remove-form">
                                         <input type="hidden" name="cart_id" value="<?php echo $item['id']; ?>">
                                         <button type="submit" name="remove_item" class="remove-btn">Remove</button>
@@ -193,8 +207,8 @@ $total    = $total_price + $shipping + $tax;
             <div class="footer-section">
                 <h4>Support</h4>
                 <ul>
-                    <li><a href="#">Shipping Info</a></li>
-                    <li><a href="#">Returns</a></li>
+                    <li><a href="feedback.php">Feedback</a></li>
+                    <li><a href="concerns.php">Concerns</a></li>
                     <li><a href="#">FAQ</a></li>
                 </ul>
             </div>
@@ -203,28 +217,6 @@ $total    = $total_price + $shipping + $tax;
             <p>&copy; <?php echo date("Y"); ?> NEXTECH. All rights reserved.</p>
         </div>
     </footer>
-
-    <script>
-        (function () {
-            const SESSION_KEY = 'nextech_browser_session';
-            if (!sessionStorage.getItem(SESSION_KEY)) {
-                fetch('clear_cart.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'same-origin'
-                })
-                .then(function (res) {
-                    if (res.ok) {
-                        sessionStorage.setItem(SESSION_KEY, '1');
-                        window.location.reload();
-                    }
-                })
-                .catch(function (err) {
-                    console.error('Cart session check failed:', err);
-                });
-            }
-        })();
-    </script>
 
 </body>
 </html>

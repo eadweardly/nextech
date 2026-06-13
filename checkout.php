@@ -10,8 +10,6 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $message = '';
 $message_type = '';
-$order_placed = false;
-$order_id = null;
 
 // Fetch cart items from DB
 $cart_items = [];
@@ -19,16 +17,20 @@ $subtotal = 0.0;
 
 try {
     $stmt = $conn->prepare("
-        SELECT c.id, c.quantity, p.id as product_id, p.name, p.price, p.image_url
+        SELECT c.id, c.quantity, c.variant_id,
+               p.id as product_id, p.name, p.price,
+               pv.variant_price, pv.variant_description
         FROM cart c
         JOIN products p ON c.product_id = p.id
+        LEFT JOIN product_variants pv ON c.variant_id = pv.id
         WHERE c.user_id = ?
     ");
     $stmt->execute([$user_id]);
     $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($cart_items as $item) {
-        $subtotal += $item['price'] * $item['quantity'];
+        $effective_price = $item['variant_id'] ? (float)$item['variant_price'] : (float)$item['price'];
+        $subtotal += $effective_price * $item['quantity'];
     }
 } catch (PDOException $e) {
     $message = 'Error loading cart.';
@@ -39,36 +41,82 @@ $shipping = $subtotal >= 100 ? 0.00 : 9.99;
 $tax      = $subtotal * 0.08;
 $total    = $subtotal + $shipping + $tax;
 
+// Fetch saved addresses
+$addresses = [];
+try {
+    $stmt = $conn->prepare("SELECT * FROM delivery_address WHERE user_id = ? ORDER BY created_at DESC");
+    $stmt->execute([$user_id]);
+    $addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // ignore
+}
+
 // Handle place order
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     if (empty($cart_items)) {
         $message = 'Your cart is empty.';
         $message_type = 'error';
     } else {
+        $address_id = null;
+
         try {
             $conn->beginTransaction();
 
+            $address_choice = $_POST['address_choice'] ?? 'new';
+
+            if ($address_choice === 'new') {
+                $secondary_address = trim($_POST['secondary_address'] ?? '');
+                $region   = trim($_POST['region'] ?? '');
+                $province = trim($_POST['province'] ?? '');
+                $city     = trim($_POST['city'] ?? '');
+                $barangay = trim($_POST['barangay'] ?? '');
+
+                if (empty($region) || empty($province) || empty($city) || empty($barangay)) {
+                    throw new Exception('Please complete the delivery address.');
+                }
+
+                $stmt = $conn->prepare("
+                    INSERT INTO delivery_address (user_id, secondary_address, region, province, city, barangay)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ");
+                $stmt->execute([$user_id, $secondary_address, $region, $province, $city, $barangay]);
+                $address_id = $conn->lastInsertId();
+            } else {
+                $address_id = intval($address_choice);
+                $stmt = $conn->prepare("SELECT id FROM delivery_address WHERE id = ? AND user_id = ?");
+                $stmt->execute([$address_id, $user_id]);
+                if (!$stmt->fetch()) {
+                    throw new Exception('Invalid address selected.');
+                }
+            }
+
             // Insert into orders
             $stmt = $conn->prepare("
-                INSERT INTO orders (user_id, status, subtotal, shipping, tax, total)
-                VALUES (?, 'pending', ?, ?, ?, ?)
+                INSERT INTO orders (user_id, address_id, status, subtotal, shipping, tax, total)
+                VALUES (?, ?, 'pending', ?, ?, ?, ?)
             ");
-            $stmt->execute([$user_id, $subtotal, $shipping, $tax, $total]);
+            $stmt->execute([$user_id, $address_id, $subtotal, $shipping, $tax, $total]);
             $order_id = $conn->lastInsertId();
 
             // Insert order items
             $item_stmt = $conn->prepare("
-                INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, line_total)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO order_items (order_id, product_id, variant_id, product_name, quantity, unit_price, line_total)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             ");
             foreach ($cart_items as $item) {
-                $line_total = $item['price'] * $item['quantity'];
+                $effective_price = $item['variant_id'] ? (float)$item['variant_price'] : (float)$item['price'];
+                $line_total = $effective_price * $item['quantity'];
+                $product_name = $item['name'];
+                if ($item['variant_id']) {
+                    $product_name .= ' (' . $item['variant_description'] . ')';
+                }
                 $item_stmt->execute([
                     $order_id,
                     $item['product_id'],
-                    $item['name'],
+                    $item['variant_id'],
+                    $product_name,
                     $item['quantity'],
-                    $item['price'],
+                    $effective_price,
                     $line_total
                 ]);
             }
@@ -79,19 +127,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
             $conn->commit();
 
-            $order_placed = true;
-            $cart_items   = [];
-            $subtotal     = 0;
-            $shipping     = 0;
-            $tax          = 0;
-            $total        = 0;
-
             header("Location: payment.php?order_id=" . $order_id);
             exit();
 
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
             $conn->rollBack();
-            $message = 'Error placing order. Please try again.';
+            $message = $e->getMessage();
             $message_type = 'error';
         }
     }
@@ -119,6 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             border: 1px solid #e0e0e0;
             border-radius: 12px;
             padding: 2rem;
+            margin-bottom: 2rem;
         }
 
         .checkout-box h2 {
@@ -149,6 +191,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         .order-item-name {
             font-weight: 600;
             font-size: 0.95rem;
+        }
+
+        .order-item-variant {
+            font-size: 0.8rem;
+            color: var(--accent);
+            font-weight: 600;
         }
 
         .order-item-qty {
@@ -214,8 +262,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             margin-bottom: 2rem;
         }
 
+        .address-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            padding: 0.9rem 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .address-option:hover {
+            border-color: var(--accent);
+            background: #f9f9f9;
+        }
+
+        .address-option input[type="radio"] {
+            margin-top: 0.2rem;
+            accent-color: var(--accent);
+            width: 18px;
+            height: 18px;
+        }
+
+        .address-text {
+            font-size: 0.9rem;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .address-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .address-form .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .address-form label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: #333;
+        }
+
+        .address-form input {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .address-form input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
         @media (max-width: 768px) {
             .checkout-section {
+                grid-template-columns: 1fr;
+            }
+            .address-form {
                 grid-template-columns: 1fr;
             }
         }
@@ -230,6 +344,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 <li><a href="index.php" class="nav-link">Home</a></li>
                 <li><a href="product.php" class="nav-link">Products</a></li>
                 <li><a href="contact.php" class="nav-link">Contact</a></li>
+                <li><a href="feedback.php" class="nav-link">Feedback</a></li>
+                <li><a href="concerns.php" class="nav-link">Concerns</a></li>
                 <li><a href="cart.php" class="nav-link">Cart</a></li>
                 <li><a href="logout.php" class="nav-link">Logout (<?php echo htmlspecialchars($_SESSION['username']); ?>)</a></li>
             </ul>
@@ -251,41 +367,91 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     <section class="checkout-section">
         <?php if (!empty($cart_items)): ?>
 
-            <div class="checkout-box">
-                <h2>Order Items (<?php echo count($cart_items); ?>)</h2>
-                <?php foreach ($cart_items as $item): ?>
-                    <div class="order-item">
-                        <div class="order-item-info">
-                            <span class="order-item-name"><?php echo htmlspecialchars($item['name']); ?></span>
-                            <span class="order-item-qty">Qty: <?php echo $item['quantity']; ?> &times; $<?php echo number_format($item['price'], 2); ?></span>
+            <div>
+                <div class="checkout-box">
+                    <h2>Order Items (<?php echo count($cart_items); ?>)</h2>
+                    <?php foreach ($cart_items as $item): ?>
+                        <?php $effective_price = $item['variant_id'] ? (float)$item['variant_price'] : (float)$item['price']; ?>
+                        <div class="order-item">
+                            <div class="order-item-info">
+                                <span class="order-item-name"><?php echo htmlspecialchars($item['name']); ?></span>
+                                <?php if ($item['variant_id']): ?>
+                                    <span class="order-item-variant"><?php echo htmlspecialchars($item['variant_description']); ?></span>
+                                <?php endif; ?>
+                                <span class="order-item-qty">Qty: <?php echo $item['quantity']; ?> &times; $<?php echo number_format($effective_price, 2); ?></span>
+                            </div>
+                            <span class="order-item-price">$<?php echo number_format($effective_price * $item['quantity'], 2); ?></span>
                         </div>
-                        <span class="order-item-price">$<?php echo number_format($item['price'] * $item['quantity'], 2); ?></span>
+                    <?php endforeach; ?>
+                </div>
+
+                <form method="POST" id="checkoutForm">
+                    <div class="checkout-box">
+                        <h2>Delivery Address</h2>
+
+                        <?php foreach ($addresses as $addr): ?>
+                            <label class="address-option">
+                                <input type="radio" name="address_choice" value="<?php echo $addr['id']; ?>">
+                                <span class="address-text">
+                                    <?php echo htmlspecialchars($addr['secondary_address'] ? $addr['secondary_address'] . ', ' : ''); ?>
+                                    <?php echo htmlspecialchars($addr['barangay']); ?>, <?php echo htmlspecialchars($addr['city']); ?>,
+                                    <?php echo htmlspecialchars($addr['province']); ?>, <?php echo htmlspecialchars($addr['region']); ?>
+                                </span>
+                            </label>
+                        <?php endforeach; ?>
+
+                        <label class="address-option">
+                            <input type="radio" name="address_choice" value="new" <?php echo empty($addresses) ? 'checked' : ''; ?>>
+                            <span class="address-text"><strong>Use a new address</strong></span>
+                        </label>
+
+                        <div class="address-form" id="newAddressForm">
+                            <div class="full-width">
+                                <label for="secondary_address">House No. / Street (optional)</label>
+                                <input type="text" id="secondary_address" name="secondary_address" placeholder="e.g. Lot 18, Block 5">
+                            </div>
+                            <div>
+                                <label for="region">Region</label>
+                                <input type="text" id="region" name="region" placeholder="e.g. Region IV-A (CALABARZON)">
+                            </div>
+                            <div>
+                                <label for="province">Province</label>
+                                <input type="text" id="province" name="province" placeholder="e.g. Batangas">
+                            </div>
+                            <div>
+                                <label for="city">City / Municipality</label>
+                                <input type="text" id="city" name="city" placeholder="e.g. Sto. Tomas">
+                            </div>
+                            <div>
+                                <label for="barangay">Barangay</label>
+                                <input type="text" id="barangay" name="barangay" placeholder="e.g. San Vicente">
+                            </div>
+                        </div>
                     </div>
-                <?php endforeach; ?>
-            </div>
 
-            <div class="cart-summary">
-                <h3>Order Summary</h3>
-                <div class="summary-row">
-                    <span>Subtotal</span>
-                    <span>$<?php echo number_format($subtotal, 2); ?></span>
-                </div>
-                <div class="summary-row">
-                    <span>Shipping</span>
-                    <span><?php echo $shipping == 0 ? 'Free' : '$' . number_format($shipping, 2); ?></span>
-                </div>
-                <div class="summary-row">
-                    <span>Tax (8%)</span>
-                    <span>$<?php echo number_format($tax, 2); ?></span>
-                </div>
-                <div class="summary-row total">
-                    <span>Total</span>
-                    <span>$<?php echo number_format($total, 2); ?></span>
-                </div>
+                    <div class="cart-summary">
+                        <h3>Order Summary</h3>
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span>$<?php echo number_format($subtotal, 2); ?></span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            <span><?php echo $shipping == 0 ? 'Free' : '$' . number_format($shipping, 2); ?></span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Tax (8%)</span>
+                            <span>$<?php echo number_format($tax, 2); ?></span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span>$<?php echo number_format($total, 2); ?></span>
+                        </div>
 
-                <form method="POST">
-                    <button type="submit" name="place_order" class="place-order-btn">Place Order</button>
+                        <button type="submit" name="place_order" class="place-order-btn">Place Order</button>
+                    </div>
                 </form>
+
                 <a href="cart.php" class="back-to-cart">← Back to Cart</a>
             </div>
 
@@ -316,8 +482,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             <div class="footer-section">
                 <h4>Support</h4>
                 <ul>
-                    <li><a href="#">Shipping Info</a></li>
-                    <li><a href="#">Returns</a></li>
+                    <li><a href="feedback.php">Feedback</a></li>
+                    <li><a href="concerns.php">Concerns</a></li>
                     <li><a href="#">FAQ</a></li>
                 </ul>
             </div>
@@ -326,6 +492,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             <p>&copy; <?php echo date("Y"); ?> NEXTECH. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        const newAddressForm = document.getElementById('newAddressForm');
+        const radios = document.querySelectorAll('input[name="address_choice"]');
+
+        function toggleNewAddressForm() {
+            const selected = document.querySelector('input[name="address_choice"]:checked');
+            if (selected && selected.value === 'new') {
+                newAddressForm.style.display = 'grid';
+            } else {
+                newAddressForm.style.display = 'none';
+            }
+        }
+
+        radios.forEach(r => r.addEventListener('change', toggleNewAddressForm));
+        toggleNewAddressForm();
+    </script>
 
 </body>
 </html>
