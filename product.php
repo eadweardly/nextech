@@ -239,7 +239,7 @@ try {
                         </h3>
 
                         <p class="product-description">
-                            <?php echo htmlspecialchars($product->getTruncatedDescription()); ?>
+                            <?php echo htmlspecialchars($product->__get('description')); ?>
                         </p>
 
                         <div class="product-specs">
