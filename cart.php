@@ -46,14 +46,14 @@ $total_price = 0;
 
 try {
     $stmt = $conn->prepare("
-        SELECT c.id, c.quantity, c.variant_id,
-               p.id as product_id, p.name, p.price, p.description,
-               pv.variant_price, pv.variant_description
-        FROM cart c
-        JOIN products p ON c.product_id = p.id
-        LEFT JOIN product_variants pv ON c.variant_id = pv.id
-        WHERE c.user_id = ?
-    ");
+    SELECT c.id, c.quantity, c.variant_id,
+           p.id as product_id, p.name, p.price, p.description, p.image_url,
+           pv.variant_price, pv.variant_description
+    FROM cart c
+    JOIN products p ON c.product_id = p.id
+    LEFT JOIN product_variants pv ON c.variant_id = pv.id
+    WHERE c.user_id = ?
+");
     $stmt->execute([$user_id]);
     $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -120,13 +120,8 @@ $total    = $total_price + $shipping + $tax;
                             ?>
                             <div class="cart-item">
                                 <div class="item-image">
-                                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                        <rect width="100" height="100" fill="#f5f5f5"/>
-                                        <rect x="15" y="20" width="70" height="60" fill="#333" rx="4"/>
-                                        <rect x="20" y="25" width="60" height="45" fill="#555" rx="2"/>
-                                        <circle cx="50" cy="47" r="10" fill="#1a1a1a"/>
-                                    </svg>
-                                </div>
+    <img src="<?php echo htmlspecialchars($item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
+</div>
                                 <div class="item-details">
                                     <h3><?php echo htmlspecialchars($item['name']); ?></h3>
                                     <?php if ($item['variant_id']): ?>

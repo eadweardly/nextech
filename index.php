@@ -106,9 +106,7 @@ $featured_products = [
         </div>
         <div class="hero-image">
             <div class="product-showcase">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23f5f5f5' width='400' height='400'/%3E%3Crect x='50' y='80' width='300' height='240' fill='%23333' rx='20'/%3E%3Crect x='60' y='90' width='280' height='200' fill='%23555' rx='15'/%3E%3Ccircle cx='200' cy='190' r='40' fill='%231a1a1a'/%3E%3C/svg%3E"
-                     alt="Premium Tech Product"
-                     class="showcase-img">
+                <img src="images/logoz.png" alt="NEXTECH Logo" class="showcase-img">
             </div>
         </div>
     </section>
