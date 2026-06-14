@@ -133,8 +133,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user_id = $_SESSION['user_id'] ?? null;
 
             $stmt = $conn->prepare("
-                INSERT INTO support_messages (user_id, type, name, email, phone, subject, message)
-                VALUES (?, 'contact', ?, ?, ?, ?, ?)
+                INSERT INTO contact_messages (user_id, name, email, phone, subject, message)
+                VALUES (?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([$user_id, $name, $email, $phone, $subject, $msg]);
 
