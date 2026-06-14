@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'db_config.php';
 
 $message      = '';
 $message_type = '';
@@ -127,25 +128,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$consent)          $errors[] = 'You must agree to the privacy policy to continue.';
 
     if (empty($errors)) {
-        // ── All valid — process the message ──────────────────────────────
-        // subject_is() uses strcmp() for exact matching
-        if (subject_is($subject, 'support')) {
-            // Priority handling for support tickets
+        // ── All valid — save to database ──────────────────────────────────
+        try {
+            $user_id = $_SESSION['user_id'] ?? null;
+
+            $stmt = $conn->prepare("
+                INSERT INTO support_messages (user_id, type, name, email, phone, subject, message)
+                VALUES (?, 'contact', ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([$user_id, $name, $email, $phone, $subject, $msg]);
+
+            $message      = 'Thank you, ' . htmlspecialchars($name) . '! Your message has been sent. We\'ll get back to you shortly.';
+            $message_type = 'success';
+            $form_data    = []; // clear form on success
+
+        } catch (PDOException $e) {
+            $message      = 'Error sending your message. Please try again.';
+            $message_type = 'error';
         }
-
-        // date() — log submission timestamp
-        $submitted_at = date('Y-m-d H:i:s');
-
-        /*
-         * TODO: send email / save to DB here.
-         * Example:
-         *   mail($email, 'We received your message', "Hi $name, ...");
-         *   $stmt = $conn->prepare("INSERT INTO contacts ...");
-         */
-
-        $message      = 'Thank you, ' . htmlspecialchars($name) . '! Your message has been sent. We\'ll get back to you shortly.';
-        $message_type = 'success';
-        $form_data    = []; // clear form on success
     } else {
         $message      = implode('<br>', $errors);
         $message_type = 'error';
@@ -170,6 +170,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <li><a href="index.php"   class="nav-link">Home</a></li>
                 <li><a href="product.php" class="nav-link">Products</a></li>
                 <li><a href="contact.php" class="nav-link active">Contact</a></li>
+                <li><a href="feedback.php" class="nav-link">Feedback</a></li>
+                <li><a href="concerns.php" class="nav-link">Concerns</a></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <li><a href="cart.php"   class="nav-link">Cart</a></li>
                     <li><a href="logout.php" class="nav-link">Logout (<?php echo htmlspecialchars($_SESSION['username']); ?>)</a></li>
@@ -357,8 +359,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="footer-section">
                 <h4>Support</h4>
                 <ul>
-                    <li><a href="#">Shipping Info</a></li>
-                    <li><a href="#">Returns</a></li>
+                    <li><a href="feedback.php">Feedback</a></li>
+                    <li><a href="concerns.php">Concerns</a></li>
                     <li><a href="#">FAQ</a></li>
                 </ul>
             </div>

@@ -117,6 +117,18 @@ CREATE TABLE IF NOT EXISTS feedbacks (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT DEFAULT NULL,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    phone VARCHAR(20),
+    subject VARCHAR(50) NOT NULL,
+    message TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
 INSERT INTO products (name, description, price, image_url, category, stock) VALUES
 ('NexChill Pro 360 Liquid Cooler', 'Triple-fan 360mm AIO liquid cooler with LCD temperature display, copper cold plate, high-density radiator, and PWM smart control. Handles up to 350W TDP. Compatible with Intel LGA1700 and AMD AM5/AM4.', 149.99, 'images/cooling1.png', 'PC Components & GPUs', 25),
 ('NexDock Pro 100W Docking Station', 'Premium docking station with 100W power delivery, dual 4K display output via HDMI and DisplayPort, Gigabit Ethernet, 10Gbps USB-C, SD/TF card slots, and 3.5mm audio jack. Works on Windows, macOS, and ChromeOS.', 129.99, 'images/dock1.png', 'Laptops & Monitors', 30),
