@@ -14,8 +14,16 @@ $message_type = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_item'])) {
     try {
         $cart_id = intval($_POST['cart_id']);
-        $stmt = $conn->prepare("DELETE FROM cart WHERE id = ? AND user_id = ?");
-        if ($stmt->execute([$cart_id, $user_id])) {
+
+        // Fetch the cart row first so we can restore its stock
+        $stmt = $conn->prepare("SELECT product_id, quantity FROM cart WHERE id = ? AND user_id = ?");
+        $stmt->execute([$cart_id, $user_id]);
+        $cart_row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($cart_row) {
+            $conn->prepare("DELETE FROM cart WHERE id = ? AND user_id = ?")->execute([$cart_id, $user_id]);
+            // Give the held units back to product stock
+            $conn->prepare("UPDATE products SET stock = stock + ? WHERE id = ?")->execute([$cart_row['quantity'], $cart_row['product_id']]);
             $message = 'Item removed from cart';
             $message_type = 'success';
         }
@@ -27,13 +35,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_item'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_quantity'])) {
     try {
-        $cart_id  = intval($_POST['cart_id']);
-        $quantity = intval($_POST['quantity']);
-        if ($quantity > 0 && $quantity <= 100) {
-            $stmt = $conn->prepare("UPDATE cart SET quantity = ? WHERE id = ? AND user_id = ?");
-            $stmt->execute([$quantity, $cart_id, $user_id]);
-            $message = 'Quantity updated';
-            $message_type = 'success';
+        $cart_id      = intval($_POST['cart_id']);
+        $new_quantity = intval($_POST['quantity']);
+
+        if ($new_quantity > 0) {
+            // Fetch the current cart row and matching product stock
+            $stmt = $conn->prepare("
+                SELECT c.quantity AS cart_qty, c.product_id,
+                       p.stock AS product_stock
+                FROM cart c
+                JOIN products p ON c.product_id = p.id
+                WHERE c.id = ? AND c.user_id = ?
+            ");
+            $stmt->execute([$cart_id, $user_id]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($row) {
+                $old_qty       = (int)$row['cart_qty'];
+                $product_stock = (int)$row['product_stock'];
+                $product_id    = (int)$row['product_id'];
+
+                // Available = DB stock + units already held by this cart row
+                $available  = $product_stock + $old_qty;
+                $capped_qty = min($new_quantity, $available, 20);
+
+                if ($capped_qty !== $old_qty) {
+                    $diff = $capped_qty - $old_qty; // + means more, - means fewer
+                    $conn->prepare("UPDATE cart SET quantity = ? WHERE id = ? AND user_id = ?")->execute([$capped_qty, $cart_id, $user_id]);
+                    $conn->prepare("UPDATE products SET stock = stock - ? WHERE id = ?")->execute([$diff, $product_id]);
+                }
+
+                if ($new_quantity > $available) {
+                    $message = "Quantity capped to available stock ({$available})";
+                    $message_type = 'error';
+                } else {
+                    $message = 'Quantity updated';
+                    $message_type = 'success';
+                }
+            }
         }
     } catch (PDOException $e) {
         $message = 'Error updating quantity';
@@ -47,7 +86,7 @@ $total_price = 0;
 try {
     $stmt = $conn->prepare("
     SELECT c.id, c.quantity, c.variant_id,
-           p.id as product_id, p.name, p.price, p.description, p.image_url,
+           p.id as product_id, p.name, p.price, p.description, p.image_url, p.stock,
            pv.variant_price, pv.variant_description
     FROM cart c
     JOIN products p ON c.product_id = p.id
@@ -135,7 +174,7 @@ $total    = $total_price + $shipping + $tax;
                                         <form method="POST" class="quantity-form">
                                             <input type="hidden" name="cart_id" value="<?php echo $item['id']; ?>">
                                             <label for="qty-<?php echo $item['id']; ?>">Qty:</label>
-                                            <input type="number" id="qty-<?php echo $item['id']; ?>" name="quantity" value="<?php echo $item['quantity']; ?>" min="1" max="100">
+                                            <input type="number" id="qty-<?php echo $item['id']; ?>" name="quantity" value="<?php echo $item['quantity']; ?>" min="1" max="<?php echo min((int)$item['stock'] + (int)$item['quantity'], 20); ?>">
                                             <button type="submit" name="update_quantity" class="update-btn">Update</button>
                                         </form>
                                     </div>

@@ -10,6 +10,21 @@ require_once 'autoload.php';
 
 /** @var Product $product */
 
+// Guard against stale/orphaned sessions (e.g. user_id left in the session
+// after the database was reset or the account was deleted). Without this,
+// any insert that references users.id — like adding to cart — fails with
+// a foreign key constraint error (1452).
+if (isset($_SESSION['user_id'])) {
+    $user_check_stmt = $conn->prepare("SELECT id FROM users WHERE id = ?");
+    $user_check_stmt->execute([$_SESSION['user_id']]);
+    if (!$user_check_stmt->fetch(PDO::FETCH_ASSOC)) {
+        session_unset();
+        session_destroy();
+        header('Location: login.php?error=session_expired');
+        exit;
+    }
+}
+
 $message = '';
 $message_type = '';
 
@@ -52,31 +67,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
                 ? intval($_POST['variant_id'])
                 : null;
 
-            $stmt = $conn->prepare("SELECT id FROM products WHERE id = ?");
+            $stmt = $conn->prepare("SELECT id, stock FROM products WHERE id = ?");
             $stmt->execute([$product_id]);
             $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($product) {
-                if ($variant_id === null) {
-                    $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND variant_id IS NULL");
-                    $stmt->execute([$user_id, $product_id]);
-                } else {
-                    $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND variant_id = ?");
-                    $stmt->execute([$user_id, $product_id, $variant_id]);
-                }
-                $cart_item = $stmt->fetch(PDO::FETCH_ASSOC);
+                $current_stock = (int)$product['stock'];
 
-                if ($cart_item) {
-                    $new_quantity = $cart_item['quantity'] + $quantity;
-                    $stmt = $conn->prepare("UPDATE cart SET quantity = ? WHERE id = ?");
-                    $stmt->execute([$new_quantity, $cart_item['id']]);
-                    $message = 'Product quantity updated in cart';
-                    $message_type = 'success';
+                if ($current_stock < 1) {
+                    $message = 'Sorry, this product is currently out of stock';
+                    $message_type = 'error';
                 } else {
-                    $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, variant_id, quantity) VALUES (?, ?, ?, ?)");
-                    $stmt->execute([$user_id, $product_id, $variant_id, $quantity]);
-                    $message = 'Product added to cart successfully';
-                    $message_type = 'success';
+                    // Cap requested quantity to available stock (max 20 per order)
+                    $max_order_qty = min($current_stock, 20);
+                    if ($quantity > $max_order_qty) {
+                        $quantity = $max_order_qty;
+                    }
+
+                    // Check if item already exists in the user's cart
+                    if ($variant_id === null) {
+                        $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND variant_id IS NULL");
+                        $stmt->execute([$user_id, $product_id]);
+                    } else {
+                        $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND variant_id = ?");
+                        $stmt->execute([$user_id, $product_id, $variant_id]);
+                    }
+                    $cart_item = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($cart_item) {
+                        // Already in cart: add to existing quantity but never exceed stock
+                        $new_quantity = min($cart_item['quantity'] + $quantity, $current_stock);
+                        $added        = $new_quantity - $cart_item['quantity'];
+
+                        if ($added > 0) {
+                            // Deduct only the newly added units from stock
+                            $conn->prepare("UPDATE cart SET quantity = ? WHERE id = ?")->execute([$new_quantity, $cart_item['id']]);
+                            $conn->prepare("UPDATE products SET stock = stock - ? WHERE id = ?")->execute([$added, $product_id]);
+                            $message = 'Product quantity updated in cart';
+                            $message_type = 'success';
+                        } else {
+                            $message = 'Cannot add more — you have reached the available stock limit';
+                            $message_type = 'error';
+                        }
+                    } else {
+                        // New cart entry: deduct the full requested quantity from stock
+                        $conn->prepare("INSERT INTO cart (user_id, product_id, variant_id, quantity) VALUES (?, ?, ?, ?)")->execute([$user_id, $product_id, $variant_id, $quantity]);
+                        $conn->prepare("UPDATE products SET stock = stock - ? WHERE id = ?")->execute([$quantity, $product_id]);
+                        $message = 'Product added to cart successfully';
+                        $message_type = 'success';
+                    }
                 }
             } else {
                 $message = 'Product not found';
@@ -143,8 +182,110 @@ try {
 
         .variant-select:focus {
             outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-light);
+            border-color: var(--primary-grey);
+            box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
+        }
+
+        /* Quantity selector */
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .quantity-control label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .quantity-input {
+            width: 70px;
+            padding: 0.5rem 0.6rem;
+            border: 1px solid var(--border-grey);
+            border-radius: var(--radius);
+            background-color: #ffffff;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .quantity-input:focus {
+            outline: none;
+            border-color: var(--primary-grey);
+            box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
+        }
+
+        .quantity-hint {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Add-to-cart toast notification, anchored to the top of the viewport */
+        .message {
+            position: fixed;
+            top: 90px;
+            left: 50%;
+            transform: translate(-50%, 0);
+            z-index: 2000;
+            min-width: 280px;
+            max-width: calc(100% - 2rem);
+            padding: 0.9rem 2.6rem 0.9rem 1.25rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            animation: messageSlideDown 0.35s ease forwards,
+                       messageFadeOut 0.4s ease 3.6s forwards;
+        }
+
+        .message-success {
+            background-color: var(--primary-grey);
+            color: var(--primary-white);
+            border: 1px solid var(--primary-grey);
+        }
+
+        .message-error {
+            background-color: var(--primary-white);
+            color: #d32f2f;
+            border: 1px solid #d32f2f;
+        }
+
+        .message-close {
+            position: absolute;
+            top: 50%;
+            right: 0.6rem;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            line-height: 1;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.6;
+            padding: 0.2rem;
+        }
+
+        .message-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes messageSlideDown {
+            from { opacity: 0; transform: translate(-50%, -16px); }
+            to   { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        @keyframes messageFadeOut {
+            to { opacity: 0; transform: translate(-50%, -16px); visibility: hidden; }
+        }
+
+        @media (max-width: 480px) {
+            .message {
+                top: 70px;
+                width: calc(100% - 2rem);
+            }
         }
     </style>
 </head>
@@ -180,6 +321,7 @@ try {
     <?php if ($message): ?>
         <div class="message message-<?php echo $message_type; ?>">
             <?php echo htmlspecialchars($message); ?>
+            <button type="button" class="message-close" onclick="this.parentElement.style.display='none'" aria-label="Close">&times;</button>
         </div>
     <?php endif; ?>
 
@@ -257,7 +399,21 @@ try {
                             <?php if (isset($_SESSION['user_id'])): ?>
                                 <form method="POST" style="display: flex; flex-direction: column;">
                                     <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
-                                    <input type="hidden" name="quantity" value="1">
+
+                                    <?php if ($product->isInStock()): ?>
+                                        <?php $max_qty = min((int)$product->__get('stock'), 20); ?>
+                                        <div class="quantity-control">
+                                            <label for="quantity-<?php echo $product_id; ?>">Qty:</label>
+                                            <input type="number"
+                                                   id="quantity-<?php echo $product_id; ?>"
+                                                   name="quantity"
+                                                   class="quantity-input"
+                                                   value="1"
+                                                   min="1"
+                                                   max="<?php echo $max_qty; ?>">
+                                            <span class="quantity-hint">(max <?php echo $max_qty; ?>)</span>
+                                        </div>
+                                    <?php endif; ?>
 
                                     <?php if (!empty($variants)): ?>
                                         <select name="variant_id" class="variant-select">
