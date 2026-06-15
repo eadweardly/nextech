@@ -254,92 +254,129 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg:          #f4f4f5;
-            --surface:     #ffffff;
-            --border:      #e4e4e7;
-            --accent:      #1a1a1a;
-            --accent-soft: #f0f0f0;
-            --text:        #18181b;
-            --muted:       #71717a;
-            --success:     #16a34a;
-            --success-bg:  #f0fdf4;
-            --error:       #dc2626;
-            --error-bg:    #fef2f2;
-            --warning:     #d97706;
-            --warning-bg:  #fffbeb;
-            --info:        #2563eb;
-            --info-bg:     #eff6ff;
-            --sidebar-w:   240px;
-            --radius:      10px;
-            --shadow:      0 1px 4px rgba(0,0,0,.08);
+            --primary-white: #ffffff;
+            --primary-grey:  #1a1a1a;
+            --secondary-grey:#333333;
+            --light-grey:    #f5f5f5;
+            --border-grey:   #e0e0e0;
+            --text-primary:  #1a1a1a;
+            --text-secondary:#666666;
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 1rem;
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2rem;
+            --spacing-xl: 3rem;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 0.5rem;
+
+            --success: #1a7a4c;
+            --success-bg: #eaf6f0;
+            --error:   #b3261e;
+            --error-bg:#fdecea;
+            --warning: #8a5a00;
+            --warning-bg:#fdf4e3;
+            --info:    #1a1a1a;
+            --info-bg: #f0f0f0;
+
+            --sidebar-w: 240px;
         }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; font-size: 0.9rem; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            color: var(--text-primary);
+            background-color: var(--light-grey);
+            line-height: 1.6;
+            letter-spacing: 0.3px;
+            display: flex;
+            min-height: 100vh;
+            font-size: 0.92rem;
+        }
 
         /* ── Sidebar ── */
         .sidebar {
             width: var(--sidebar-w);
-            background: var(--accent);
-            color: #fff;
+            background: var(--primary-white);
+            color: var(--text-primary);
             display: flex;
             flex-direction: column;
             position: fixed;
             top: 0; left: 0; bottom: 0;
             z-index: 100;
             overflow-y: auto;
+            border-right: 1px solid var(--border-grey);
         }
 
         .sidebar-logo {
-            padding: 1.5rem 1.25rem 1rem;
-            font-size: 1.3rem;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            border-bottom: 1px solid rgba(255,255,255,.12);
+            padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--primary-grey);
+            border-bottom: 1px solid var(--border-grey);
+            position: relative;
         }
 
-        .sidebar-logo span { font-size: 0.65rem; display: block; font-weight: 400; color: rgba(255,255,255,.5); letter-spacing: 0.08em; margin-top: 2px; text-transform: uppercase; }
+        .sidebar-logo::after {
+            content: '';
+            display: block;
+            height: 3px;
+            margin-top: var(--spacing-sm);
+            margin-left: calc(-1 * var(--spacing-md));
+            margin-right: calc(-1 * var(--spacing-md));
+            background: linear-gradient(90deg, #1a1a1a 0%, #555 50%, #1a1a1a 100%);
+            background-size: 200% auto;
+            animation: navShimmer 4s linear infinite;
+        }
 
-        .sidebar-nav { padding: 1rem 0; flex: 1; }
+        @keyframes navShimmer {
+            0%   { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .sidebar-logo span { font-size: 0.65rem; display: block; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.12em; margin-top: 4px; text-transform: uppercase; }
+
+        .sidebar-nav { padding: var(--spacing-sm) 0; flex: 1; }
 
         .nav-item {
             display: flex;
             align-items: center;
             gap: 0.65rem;
-            padding: 0.65rem 1.25rem;
-            color: rgba(255,255,255,.7);
+            padding: 0.7rem var(--spacing-md);
+            color: var(--text-secondary);
             text-decoration: none;
             font-size: 0.875rem;
             font-weight: 500;
-            transition: background 0.15s, color 0.15s;
-            border-left: 3px solid transparent;
+            letter-spacing: 0.5px;
+            transition: var(--transition);
+            border-left: 2px solid transparent;
         }
 
-        .nav-item:hover { background: rgba(255,255,255,.07); color: #fff; }
-        .nav-item.active { background: rgba(255,255,255,.12); color: #fff; border-left-color: #fff; }
+        .nav-item:hover { color: var(--primary-grey); background: var(--light-grey); }
+        .nav-item.active { background: var(--light-grey); color: var(--primary-grey); border-left-color: var(--primary-grey); font-weight: 700; }
         .nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
 
         .sidebar-footer {
-            padding: 1rem 1.25rem;
-            border-top: 1px solid rgba(255,255,255,.12);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-top: 1px solid var(--border-grey);
             font-size: 0.78rem;
-            color: rgba(255,255,255,.4);
+            color: var(--text-secondary);
         }
 
-        .sidebar-footer strong { color: rgba(255,255,255,.7); display: block; margin-bottom: 2px; }
+        .sidebar-footer strong { color: var(--primary-grey); display: block; margin-bottom: 2px; letter-spacing: 0.5px; }
 
-        .sidebar-footer a { color: rgba(255,255,255,.5); text-decoration: none; font-size: 0.8rem; }
-        .sidebar-footer a:hover { color: #fff; }
+        .sidebar-footer a { color: var(--text-secondary); text-decoration: none; font-size: 0.8rem; border-bottom: 1px solid transparent; transition: var(--transition); }
+        .sidebar-footer a:hover { color: var(--primary-grey); border-bottom-color: var(--primary-grey); }
 
         /* ── Main ── */
         .main {
             margin-left: var(--sidebar-w);
             flex: 1;
-            padding: 2rem;
+            padding: var(--spacing-lg);
             min-height: 100vh;
         }
 
-        .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
-        .page-subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .page-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: -0.5px; color: var(--primary-grey); }
+        .page-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: var(--spacing-md); }
 
         /* ── Toast ── */
         .toast {
@@ -348,33 +385,34 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
             gap: 0.6rem;
             padding: 0.8rem 1.1rem;
             border-radius: var(--radius);
-            margin-bottom: 1.25rem;
+            margin-bottom: var(--spacing-md);
             font-size: 0.875rem;
             font-weight: 500;
+            border: 1px solid var(--border-grey);
         }
-        .toast.success { background: var(--success-bg); color: var(--success); border: 1px solid #bbf7d0; }
-        .toast.error   { background: var(--error-bg);   color: var(--error);   border: 1px solid #fecaca; }
+        .toast.success { background: var(--success-bg); color: var(--success); border-color: #cdebd9; }
+        .toast.error   { background: var(--error-bg);   color: var(--error);   border-color: #f6cdc9; }
 
         /* ── Stat Cards ── */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
         .stat-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
+            background: var(--primary-white);
+            border: 1px solid var(--border-grey);
             border-radius: var(--radius);
-            padding: 1.25rem 1.5rem;
-            box-shadow: var(--shadow);
+            padding: var(--spacing-md);
+            transition: var(--transition);
         }
-        .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
-        .stat-value { font-size: 1.8rem; font-weight: 800; line-height: 1; }
-        .stat-sub   { font-size: 0.78rem; color: var(--muted); margin-top: 0.35rem; }
+        .stat-card:hover { border-color: var(--primary-grey); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+        .stat-label { font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; font-weight: 600; }
+        .stat-value { font-size: 1.9rem; font-weight: 700; line-height: 1; color: var(--primary-grey); letter-spacing: -0.5px; }
+        .stat-sub   { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.35rem; }
 
         /* ── Card ── */
         .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
+            background: var(--primary-white);
+            border: 1px solid var(--border-grey);
             border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 1.5rem;
+            margin-bottom: var(--spacing-md);
             overflow: hidden;
         }
 
@@ -382,102 +420,106 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 1.25rem;
-            border-bottom: 1px solid var(--border);
-            background: var(--surface);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-bottom: 1px solid var(--border-grey);
         }
 
-        .card-header h2 { font-size: 1rem; font-weight: 700; }
-        .card-body { padding: 1.25rem; }
+        .card-header h2 { font-size: 1rem; font-weight: 700; letter-spacing: 0.3px; color: var(--primary-grey); }
+        .card-body { padding: var(--spacing-md); }
 
         /* ── Table ── */
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { text-align: left; padding: 0.6rem 0.75rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--bg); font-weight: 600; }
-        td { padding: 0.7rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th { text-align: left; padding: 0.7rem var(--spacing-sm); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); border-bottom: 1px solid var(--border-grey); background: var(--light-grey); font-weight: 700; }
+        td { padding: 0.75rem var(--spacing-sm); border-bottom: 1px solid var(--border-grey); vertical-align: middle; }
         tr:last-child td { border-bottom: none; }
-        tr:hover td { background: #fafafa; }
+        tr:hover td { background: var(--light-grey); }
 
         /* ── Badges ── */
         .badge {
             display: inline-block;
-            padding: 2px 9px;
+            padding: 2px 10px;
             border-radius: 100px;
-            font-size: 0.72rem;
-            font-weight: 600;
+            font-size: 0.7rem;
+            font-weight: 700;
             text-transform: capitalize;
+            letter-spacing: 0.3px;
+            border: 1px solid transparent;
         }
-        .badge-pending    { background: var(--warning-bg); color: var(--warning); }
-        .badge-processing { background: var(--info-bg);    color: var(--info); }
-        .badge-shipped    { background: #f0fdf4;           color: #15803d; }
-        .badge-delivered  { background: var(--success-bg); color: var(--success); }
-        .badge-cancelled  { background: var(--error-bg);   color: var(--error); }
-        .badge-completed  { background: var(--success-bg); color: var(--success); }
-        .badge-open       { background: var(--warning-bg); color: var(--warning); }
-        .badge-resolved   { background: var(--success-bg); color: var(--success); }
-        .badge-in-stock   { background: var(--success-bg); color: var(--success); }
-        .badge-out-stock  { background: var(--error-bg);   color: var(--error); }
+        .badge-pending    { background: var(--warning-bg); color: var(--warning); border-color: #f3e2bb; }
+        .badge-processing { background: var(--info-bg);    color: var(--info);   border-color: var(--border-grey); }
+        .badge-shipped    { background: var(--success-bg); color: var(--success); border-color: #cdebd9; }
+        .badge-delivered  { background: var(--success-bg); color: var(--success); border-color: #cdebd9; }
+        .badge-cancelled  { background: var(--error-bg);   color: var(--error);  border-color: #f6cdc9; }
+        .badge-completed  { background: var(--success-bg); color: var(--success); border-color: #cdebd9; }
+        .badge-open       { background: var(--warning-bg); color: var(--warning); border-color: #f3e2bb; }
+        .badge-resolved   { background: var(--success-bg); color: var(--success); border-color: #cdebd9; }
+        .badge-in-stock   { background: var(--success-bg); color: var(--success); border-color: #cdebd9; }
+        .badge-out-stock  { background: var(--error-bg);   color: var(--error);  border-color: #f6cdc9; }
 
         /* ── Buttons ── */
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            padding: 0.5rem 1rem;
-            border-radius: 7px;
+            padding: 0.55rem 1.1rem;
+            border-radius: var(--radius);
             font-size: 0.82rem;
             font-weight: 600;
             cursor: pointer;
-            border: none;
-            transition: all 0.15s;
+            border: 2px solid transparent;
+            transition: var(--transition);
             text-decoration: none;
+            letter-spacing: 0.3px;
         }
-        .btn-primary   { background: var(--accent); color: #fff; }
-        .btn-primary:hover { background: #333; }
-        .btn-danger    { background: var(--error-bg); color: var(--error); border: 1px solid #fecaca; }
-        .btn-danger:hover  { background: var(--error); color: #fff; }
-        .btn-secondary { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--border); }
-        .btn-secondary:hover { background: var(--border); }
-        .btn-sm { padding: 0.3rem 0.7rem; font-size: 0.78rem; }
-        .btn-success { background: var(--success-bg); color: var(--success); border: 1px solid #bbf7d0; }
-        .btn-success:hover { background: var(--success); color: #fff; }
+        .btn-primary   { background: var(--primary-grey); color: var(--primary-white); border-color: var(--primary-grey); }
+        .btn-primary:hover { background: var(--primary-white); color: var(--primary-grey); }
+        .btn-danger    { background: var(--error-bg); color: var(--error); border-color: #f6cdc9; }
+        .btn-danger:hover  { background: var(--error); color: var(--primary-white); border-color: var(--error); }
+        .btn-secondary { background: var(--primary-white); color: var(--primary-grey); border-color: var(--border-grey); }
+        .btn-secondary:hover { background: var(--primary-grey); color: var(--primary-white); border-color: var(--primary-grey); }
+        .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.78rem; }
+        .btn-success { background: var(--success-bg); color: var(--success); border-color: #cdebd9; }
+        .btn-success:hover { background: var(--success); color: var(--primary-white); border-color: var(--success); }
 
         /* ── Forms ── */
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); }
         .form-grid .full { grid-column: 1 / -1; }
         .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
-        .form-label { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+        .form-label { font-size: 0.8rem; font-weight: 600; color: var(--primary-grey); letter-spacing: 0.3px; }
         .form-input, .form-select, .form-textarea {
-            padding: 0.55rem 0.8rem;
-            border: 1px solid var(--border);
-            border-radius: 7px;
+            padding: 0.6rem 0.85rem;
+            border: 1px solid var(--border-grey);
+            border-radius: var(--radius);
             font-size: 0.875rem;
             width: 100%;
-            background: #fff;
-            color: var(--text);
-            transition: border-color 0.15s, box-shadow 0.15s;
+            background: var(--primary-white);
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: var(--transition);
         }
         .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(26,26,26,.08);
+            border-color: var(--primary-grey);
+            box-shadow: 0 0 0 3px rgba(26,26,26,.06);
         }
         .form-textarea { resize: vertical; min-height: 90px; }
         .form-actions { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
 
         /* ── Inline status form ── */
         .status-form { display: flex; gap: 0.5rem; align-items: center; }
-        .status-form select { padding: 0.3rem 0.55rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; }
+        .status-form select { padding: 0.35rem 0.6rem; border: 1px solid var(--border-grey); border-radius: var(--radius); font-size: 0.8rem; font-family: inherit; }
 
         /* ── Empty state ── */
-        .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
-        .empty .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .empty { text-align: center; padding: var(--spacing-xl) var(--spacing-sm); color: var(--text-secondary); }
+        .empty .icon { font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.6; }
+        .empty a { color: var(--primary-grey); font-weight: 600; border-bottom: 1px solid var(--primary-grey); text-decoration: none; }
 
-        /* ── Tabs (mobile sidebar toggle placeholder) ── */
+        /* ── Mobile sidebar toggle ── */
         @media (max-width: 768px) {
             .sidebar { width: 200px; transform: translateX(-100%); transition: transform 0.25s; }
             .sidebar.open { transform: translateX(0); }
-            .main { margin-left: 0; padding: 1rem; }
+            .main { margin-left: 0; padding: var(--spacing-sm); }
             .form-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .mobile-toggle { display: flex !important; }
@@ -486,44 +528,47 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
         .mobile-toggle {
             display: none;
             position: fixed;
-            top: 1rem; left: 1rem;
+            top: var(--spacing-sm); left: var(--spacing-sm);
             z-index: 200;
-            background: var(--accent);
-            color: #fff;
+            background: var(--primary-grey);
+            color: var(--primary-white);
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius);
             padding: 0.5rem 0.7rem;
             cursor: pointer;
             font-size: 1.1rem;
         }
 
         /* ── Star rating ── */
-        .stars { color: #f59e0b; letter-spacing: 1px; }
+        .stars { color: var(--primary-grey); letter-spacing: 1px; }
 
         /* ── Image thumb ── */
-        .img-thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); }
+        .img-thumb { width: 44px; height: 44px; object-fit: contain; border-radius: var(--radius); border: 1px solid var(--border-grey); background: var(--light-grey); padding: 4px; }
 
         /* ── Overlay modal for add/edit ── */
         .modal-overlay {
             position: fixed; inset: 0;
-            background: rgba(0,0,0,.45);
+            background: rgba(26,26,26,.45);
             z-index: 300;
             display: flex; align-items: center; justify-content: center;
-            padding: 1rem;
+            padding: var(--spacing-sm);
         }
         .modal {
-            background: var(--surface);
-            border-radius: 14px;
+            background: var(--primary-white);
+            border-radius: var(--radius);
             width: 100%;
             max-width: 620px;
             max-height: 90vh;
             overflow-y: auto;
-            padding: 1.75rem;
-            box-shadow: 0 20px 60px rgba(0,0,0,.25);
+            padding: var(--spacing-lg);
+            box-shadow: 0 20px 60px rgba(0,0,0,.18);
+            border: 1px solid var(--border-grey);
         }
-        .modal h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 1.25rem; }
-        .modal-close { float: right; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--muted); margin-top: -4px; }
+        .modal h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: var(--spacing-md); letter-spacing: -0.3px; color: var(--primary-grey); }
+        .modal-close { float: right; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-secondary); margin-top: -4px; transition: var(--transition); }
+        .modal-close:hover { color: var(--primary-grey); }
     </style>
+
 </head>
 <body>
 

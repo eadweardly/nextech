@@ -36,6 +36,27 @@ $hero_subtitle = sanitize_subtitle(
     'Cutting-edge tech products designed for the modern lifestyle'
 );
 
+// ── Admin Check (for navbar link) ──────────────────────────────────────────
+$is_admin = false;
+if (isset($_SESSION['user_id'])) {
+    $admin_usernames = ['admin', 'nextech_admin', 'hihi'];
+    if (!empty($_SESSION['username']) && in_array($_SESSION['username'], $admin_usernames)) {
+        $is_admin = true;
+    } else {
+        require_once 'db_config.php';
+        try {
+            $stmt = $conn->prepare("SELECT is_admin FROM users WHERE id = ?");
+            $stmt->execute([$_SESSION['user_id']]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row && !empty($row['is_admin'])) {
+                $is_admin = true;
+            }
+        } catch (PDOException $e) {
+            // is_admin column may not exist - ignore
+        }
+    }
+}
+
 $featured_products = [
     [
         'name'        => 'NexView 32" 4K Ultra HD Display',
@@ -82,6 +103,9 @@ $featured_products = [
                 <li><a href="product.php" class="nav-link">Products</a></li>
                 <li><a href="contact.php" class="nav-link">Contact</a></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
+                    <?php if ($is_admin): ?>
+                        <li><a href="admin.php" class="nav-link">Admin Panel</a></li>
+                    <?php endif; ?>
                     <li class="nav-user">
                         <span class="nav-username">👤 <?php echo htmlspecialchars($_SESSION['username']); ?></span>
                         <a href="logout.php" class="nav-link nav-logout">Logout</a>
