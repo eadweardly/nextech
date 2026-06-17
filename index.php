@@ -1,23 +1,13 @@
 <?php
 session_start();
-
-// ── Home Page Utility Functions ──────────────────────────────────────────────
-
-/**
- * Truncates a string to a max character length using strlen().
- */
 function truncate_text(string $text, int $max = 80): string {
-    $text = trim($text); // trim() — remove stray whitespace
+    $text = trim($text); 
     if (strlen($text) > $max) {
         return substr($text, 0, $max) . '...';
     }
     return $text;
 }
 
-/**
- * Sanitizes a subtitle: trims it, checks it isn't empty,
- * and enforces a word-count limit using str_word_count().
- */
 function sanitize_subtitle(string $text, int $max_words = 15): string {
     $text = trim($text);
     if (empty($text)) {
@@ -30,13 +20,11 @@ function sanitize_subtitle(string $text, int $max_words = 15): string {
     return $text;
 }
 
-// ── Page Data ────────────────────────────────────────────────────────────────
 
 $hero_subtitle = sanitize_subtitle(
     'Cutting-edge tech products designed for the modern lifestyle'
 );
 
-// ── Admin Check (for navbar link) ──────────────────────────────────────────
 $is_admin = false;
 if (isset($_SESSION['user_id'])) {
     $admin_usernames = ['admin', 'nextech_admin', 'hihi'];
@@ -52,7 +40,6 @@ if (isset($_SESSION['user_id'])) {
                 $is_admin = true;
             }
         } catch (PDOException $e) {
-            // is_admin column may not exist - ignore
         }
     }
 }
@@ -95,7 +82,6 @@ $featured_products = [
 </head>
 <body>
 
-    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-container">
             <div class="logo">NEXTECH</div>
@@ -121,13 +107,11 @@ $featured_products = [
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
             <h1 class="hero-title">Experience the Future of Technology</h1>
             <p class="hero-subtitle">
                 <?php echo htmlspecialchars($hero_subtitle); ?>
-                <!-- sanitize_subtitle() used above: trim() + empty() + str_word_count() -->
             </p>
             <a href="product.php" class="cta-button">Shop Now</a>
         </div>
@@ -138,7 +122,6 @@ $featured_products = [
         </div>
     </section>
 
-    <!-- Featured Products Section -->
     <section class="featured-section">
         <h2 class="section-title">Featured Collections</h2>
         
@@ -148,14 +131,12 @@ $featured_products = [
                     <div class="product-image">
                         <img src="<?php echo htmlspecialchars($product['image']); ?>"
                              alt="<?php echo htmlspecialchars($product['name']); ?>">
-                        <!-- ↑ forward slashes fixed (imgs/image-x.png) -->
                     </div>
                     <h3 class="product-name">
                         <?php echo htmlspecialchars($product['name']); ?>
                     </h3>
                     <p class="product-desc">
                         <?php echo htmlspecialchars(truncate_text($product['description'], 80)); ?>
-                        <!-- ↑ truncate_text() uses trim() + strlen() -->
                     </p>
                     <p class="product-price">
                         <?php echo htmlspecialchars($product['price']); ?>
@@ -166,14 +147,12 @@ $featured_products = [
         </div>
     </section>
 
-    <!-- Call to Action Section -->
     <section class="cta-section">
         <h2>Discover Our Complete Collection</h2>
         <p>Browse our curated selection of premium tech products</p>
         <a href="product.php" class="cta-button-large">Shop All Products</a>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -198,7 +177,6 @@ $featured_products = [
             </div>
         </div>
         <div class="footer-bottom">
-            <!-- date("Y") — always shows the current year automatically -->
             <p>&copy; <?php echo date("Y"); ?> NEXTECH. All rights reserved.</p>
         </div>
     </footer>

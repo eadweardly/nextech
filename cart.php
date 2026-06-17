@@ -15,14 +15,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_item'])) {
     try {
         $cart_id = intval($_POST['cart_id']);
 
-        // Fetch the cart row first so we can restore its stock
         $stmt = $conn->prepare("SELECT product_id, quantity FROM cart WHERE id = ? AND user_id = ?");
         $stmt->execute([$cart_id, $user_id]);
         $cart_row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($cart_row) {
             $conn->prepare("DELETE FROM cart WHERE id = ? AND user_id = ?")->execute([$cart_id, $user_id]);
-            // Give the held units back to product stock
             $conn->prepare("UPDATE products SET stock = stock + ? WHERE id = ?")->execute([$cart_row['quantity'], $cart_row['product_id']]);
             $message = 'Item removed from cart';
             $message_type = 'success';
@@ -39,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_quantity'])) {
         $new_quantity = intval($_POST['quantity']);
 
         if ($new_quantity > 0) {
-            // Fetch the current cart row and matching product stock
             $stmt = $conn->prepare("
                 SELECT c.quantity AS cart_qty, c.product_id,
                        p.stock AS product_stock
@@ -55,12 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_quantity'])) {
                 $product_stock = (int)$row['product_stock'];
                 $product_id    = (int)$row['product_id'];
 
-                // Available = DB stock + units already held by this cart row
                 $available  = $product_stock + $old_qty;
                 $capped_qty = min($new_quantity, $available, 20);
 
                 if ($capped_qty !== $old_qty) {
-                    $diff = $capped_qty - $old_qty; // + means more, - means fewer
+                    $diff = $capped_qty - $old_qty; 
                     $conn->prepare("UPDATE cart SET quantity = ? WHERE id = ? AND user_id = ?")->execute([$capped_qty, $cart_id, $user_id]);
                     $conn->prepare("UPDATE products SET stock = stock - ? WHERE id = ?")->execute([$diff, $product_id]);
                 }

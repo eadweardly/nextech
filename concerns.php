@@ -39,7 +39,6 @@ try {
     $stmt->execute([$user_id]);
     $concerns = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    // ignore
 }
 ?>
 <!DOCTYPE html>

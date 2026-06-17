@@ -140,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $message      = 'Thank you, ' . htmlspecialchars($name) . '! Your message has been sent. We\'ll get back to you shortly.';
             $message_type = 'success';
-            $form_data    = []; // clear form on success
+            $form_data    = []; 
 
         } catch (PDOException $e) {
             $message      = 'Error sending your message. Please try again.';
@@ -163,7 +163,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-container">
             <div class="logo">NEXTECH</div>
@@ -186,24 +185,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </nav>
 
-    <!-- Page Header -->
     <section class="page-header">
         <h1>Get In Touch</h1>
         <p>We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
     </section>
 
-    <!-- Message / Error Display -->
     <?php if ($message): ?>
         <div class="message message-<?php echo $message_type; ?>">
-            <?php echo $message; // may contain <br> for multiple errors ?>
+            <?php echo $message; ?>
         </div>
     <?php endif; ?>
 
-    <!-- Contact Content -->
     <section class="contact-section">
         <div class="contact-container">
 
-            <!-- Contact Info -->
             <div class="contact-info">
                 <div class="info-card">
                     <div class="info-icon"><i class="bi bi-geo-alt-fill"></i></div>
@@ -222,13 +217,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
 
-            <!-- Contact Form -->
             <div class="contact-form-wrapper">
                 <h2 class="form-title">Send Us a Message</h2>
 
                 <form class="contact-form" action="contact.php" method="POST">
 
-                    <!-- Full Name — validate_name(): trim() + empty() + strlen() + preg_match() -->
                     <div class="form-group">
                         <label for="name" class="form-label">Full Name</label>
                         <input type="text"
@@ -240,7 +233,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                value="<?php echo $form_data['name'] ?? ''; ?>">
                     </div>
 
-                    <!-- Email — validate_email(): trim() + empty() + preg_match() -->
                     <div class="form-group">
                         <label for="email" class="form-label">Email Address</label>
                         <input type="email"
@@ -252,7 +244,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                value="<?php echo $form_data['email'] ?? ''; ?>">
                     </div>
 
-                    <!-- Phone — validate_phone(): trim() + empty() + preg_match() (optional) -->
                     <div class="form-group">
                         <label for="phone" class="form-label">Phone Number (Optional)</label>
                         <input type="tel"
@@ -263,7 +254,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                value="<?php echo $form_data['phone'] ?? ''; ?>">
                     </div>
 
-                    <!-- Subject — validate_subject(): trim() + empty() + strcasecmp() -->
                     <div class="form-group">
                         <label for="subject" class="form-label">Subject</label>
                         <select id="subject" name="subject" required class="form-select">
@@ -286,7 +276,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </select>
                     </div>
 
-                    <!-- Message — validate_message(): trim() + empty() + strlen() + str_word_count() -->
                     <div class="form-group">
                         <label for="message" class="form-label">
                             Message
@@ -301,7 +290,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                   placeholder="Tell us what you think..."><?php echo $form_data['message'] ?? ''; ?></textarea>
                     </div>
 
-                    <!-- Consent — validate_consent(): is_bool() -->
                     <div class="form-group checkbox">
                         <input type="checkbox"
                                id="consent"
@@ -319,7 +307,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </section>
 
-    <!-- FAQ Section -->
     <section class="faq-section">
         <h2>Frequently Asked Questions</h2>
         <div class="faq-container">
@@ -342,7 +329,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -367,13 +353,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
         <div class="footer-bottom">
-            <!-- date("Y") — dynamic copyright year -->
             <p>&copy; <?php echo date("Y"); ?> NEXTECH. All rights reserved.</p>
         </div>
     </footer>
 
     <script>
-        // Live character counter for the message textarea
         const textarea  = document.getElementById('message');
         const charCount = document.getElementById('charCount');
 

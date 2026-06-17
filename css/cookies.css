@@ -1,0 +1,205 @@
+/* ============================================
+   COOKIE CONSENT BANNER
+   Uses the same design tokens as login.css
+   (falls back to hard-coded values if those
+   variables aren't defined on a given page)
+   ============================================ */
+
+.cookie-consent {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 2000;
+    width: 420px;
+    max-width: calc(100% - 48px);
+    background-color: var(--primary-white, #ffffff);
+    border: 1px solid var(--border-grey, #e0e0e0);
+    border-radius: var(--radius, 0.5rem);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.14);
+    padding: 28px 28px 24px;
+    animation: cookieSlideUp 0.4s ease both;
+}
+
+@keyframes cookieSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.cookie-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 0;
+    color: var(--text-primary, #1a1a1a);
+    padding: 4px;
+    transition: var(--transition, all 0.3s ease);
+}
+
+.cookie-close:hover {
+    opacity: 0.6;
+}
+
+.cookie-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--primary-grey, #1a1a1a);
+    margin-bottom: 14px;
+    letter-spacing: -0.3px;
+    padding-right: 24px;
+}
+
+.cookie-text {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--text-primary, #1a1a1a);
+    margin-bottom: 22px;
+}
+
+.cookie-link {
+    color: var(--primary-grey, #1a1a1a);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.cookie-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.cookie-btn {
+    flex: 1;
+    padding: 14px 18px;
+    border-radius: var(--radius, 0.5rem);
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: var(--transition, all 0.3s ease);
+    letter-spacing: 0.3px;
+    font-family: inherit;
+}
+
+.cookie-btn-accept {
+    background-color: var(--primary-grey, #1a1a1a);
+    border-color: var(--primary-grey, #1a1a1a);
+    color: #ffffff;
+}
+
+.cookie-btn-accept:hover {
+    background-color: var(--secondary-grey, #333333);
+    border-color: var(--secondary-grey, #333333);
+    transform: translateY(-1px);
+}
+
+.cookie-btn-preferences {
+    background-color: var(--light-grey, #f5f5f5);
+    border-color: var(--light-grey, #f5f5f5);
+    color: var(--text-primary, #1a1a1a);
+}
+
+.cookie-btn-preferences:hover {
+    background-color: var(--border-grey, #e0e0e0);
+}
+
+/* Preferences toggle list */
+.cookie-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-grey, #e0e0e0);
+}
+
+.cookie-option:last-of-type {
+    border-bottom: none;
+}
+
+.cookie-option-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cookie-option-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary, #1a1a1a);
+}
+
+.cookie-option-desc {
+    font-size: 0.78rem;
+    color: var(--text-secondary, #666666);
+}
+
+.cookie-switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.cookie-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.cookie-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--border-grey, #e0e0e0);
+    border-radius: 24px;
+    transition: var(--transition, all 0.3s ease);
+}
+
+.cookie-slider::before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    transition: var(--transition, all 0.3s ease);
+}
+
+.cookie-switch input:checked + .cookie-slider {
+    background-color: var(--primary-grey, #1a1a1a);
+}
+
+.cookie-switch input:checked + .cookie-slider::before {
+    transform: translateX(18px);
+}
+
+.cookie-switch-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cookie-preferences-view[hidden],
+.cookie-default-view[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 480px) {
+    .cookie-consent {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        width: auto;
+        max-width: calc(100% - 24px);
+        padding: 22px 20px;
+    }
+
+    .cookie-actions {
+        flex-direction: column;
+    }
+}

@@ -1,5 +1,4 @@
 <?php
-// ── Load Autoloader for OOP Classes ───────────────────────────────────────────
 require_once 'autoload.php';
 
 session_start();
@@ -9,10 +8,8 @@ $login_error = '';
 $login_success = '';
 $show_signup = isset($_GET['signup']);
 
-// ── LOAD EMAIL FROM COOKIE (Remember Me) ────────────────────────────────────
 $email_value = isset($_COOKIE['user_email']) ? htmlspecialchars($_COOKIE['user_email']) : '';
 
-// Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
@@ -29,12 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 
-                // ── SET COOKIE IF "REMEMBER ME" IS CHECKED ──────────────────────────
                 if (isset($_POST['remember'])) {
                     setcookie('user_email', $email, time() + (20), "/", "", false, true);
                     
                 } else {
-                    // Clear cookie if "Remember me" was unchecked
                     setcookie('user_email', '', time() - 3600, "/");
                 }
                 
@@ -49,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     }
 }
 
-// Handle signup form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signup'])) {
     $username = trim($_POST['signup_username']);
     $email = trim($_POST['signup_email']);
@@ -64,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signup'])) {
         $login_error = 'Password must be at least 6 characters';
     } else {
         try {
-            // Check if user already exists
             $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? OR username = ?");
             $stmt->execute([$email, $username]);
             $existing_user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -72,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signup'])) {
             if ($existing_user) {
                 $login_error = 'Email or username already exists';
             } else {
-                // Create new user
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                 $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
                 
@@ -80,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signup'])) {
                     $_SESSION['user_id'] = $conn->lastInsertId();
                     $_SESSION['username'] = $username;
                     
-                    // ── SET COOKIE AFTER SIGNUP (Optional) ──────────────────────────────
                     setcookie('user_email', $email, time() + (86400 * 30), "/", "", false, true);
                     
                     header("Location: index.php");
@@ -107,10 +98,10 @@ if (isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $show_signup ? 'Sign Up' : 'Login'; ?> - NEXTECH</title>
     <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/cookies.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
-    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-container">
             <div class="logo">NEXTECH</div>
@@ -120,15 +111,15 @@ if (isset($_SESSION['user_id'])) {
                 <li><a href="contact.php" class="nav-link">Contact</a></li>
                 <li><a href="login.php" class="nav-link active">Login</a></li>
                 <li><a href="cart.php" class="nav-link">Cart</a></li>
+                <li><a href="feedback.php" class="nav-link">Feedback</a></li>
+                <li><a href="concerns.php" class="nav-link">Concerns</a></li>
             </ul>
             <div class="cart-icon"><i class="bi bi-cart3"></i></div>
         </div>
     </nav>
 
-    <!-- Login/Signup Container -->
     <section class="login-section">
         <div class="login-container">
-            <!-- Login/Signup Form -->
             <div class="login-box">
                 <?php if ($show_signup): ?>
                     <h1 class="login-title">Create Account</h1>
@@ -226,7 +217,6 @@ if (isset($_SESSION['user_id'])) {
                 <?php endif; ?>
             </div>
 
-            <!-- Right Side Content -->
             <div class="login-visual">
                 <div class="visual-content">
                     <h2>Experience Premium Tech</h2>
@@ -267,7 +257,6 @@ if (isset($_SESSION['user_id'])) {
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -296,8 +285,9 @@ if (isset($_SESSION['user_id'])) {
         </div>
     </footer>
 
+    <?php include 'cookies.php'; ?>
+
     <script>
-        // Password visibility toggle
         const togglePwdBtn = document.getElementById('toggle-pwd');
         if (togglePwdBtn) {
             togglePwdBtn.addEventListener('click', function() {
@@ -312,7 +302,6 @@ if (isset($_SESSION['user_id'])) {
             });
         }
 
-        // Form validation for signup
         const signupForm = document.querySelector('.login-form[method="POST"]');
         if (signupForm && document.getElementById('signup_username')) {
             signupForm.addEventListener('submit', function(e) {
@@ -346,7 +335,6 @@ if (isset($_SESSION['user_id'])) {
             });
         }
 
-        // Focus management
         document.querySelectorAll('.form-input').forEach(input => {
             input.addEventListener('focus', function() {
                 this.style.borderColor = '#1a1a1a';

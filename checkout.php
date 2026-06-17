@@ -11,7 +11,6 @@ $user_id = $_SESSION['user_id'];
 $message = '';
 $message_type = '';
 
-// Fetch cart items from DB
 $cart_items = [];
 $subtotal = 0.0;
 
@@ -41,17 +40,13 @@ $shipping = $subtotal >= 100 ? 0.00 : 9.99;
 $tax      = $subtotal * 0.08;
 $total    = $subtotal + $shipping + $tax;
 
-// Fetch saved addresses
 $addresses = [];
 try {
     $stmt = $conn->prepare("SELECT * FROM delivery_address WHERE user_id = ? ORDER BY created_at DESC");
     $stmt->execute([$user_id]);
     $addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    // ignore
-}
+} catch (PDOException $e) {}
 
-// Handle place order
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     if (empty($cart_items)) {
         $message = 'Your cart is empty.';
@@ -90,7 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 }
             }
 
-            // Insert into orders
             $stmt = $conn->prepare("
                 INSERT INTO orders (user_id, address_id, status, subtotal, shipping, tax, total)
                 VALUES (?, ?, 'pending', ?, ?, ?, ?)
@@ -98,7 +92,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             $stmt->execute([$user_id, $address_id, $subtotal, $shipping, $tax, $total]);
             $order_id = $conn->lastInsertId();
 
-            // Insert order items
             $item_stmt = $conn->prepare("
                 INSERT INTO order_items (order_id, product_id, variant_id, product_name, quantity, unit_price, line_total)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -121,7 +114,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 ]);
             }
 
-            // Clear the cart
             $stmt = $conn->prepare("DELETE FROM cart WHERE user_id = ?");
             $stmt->execute([$user_id]);
 

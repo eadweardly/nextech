@@ -18,7 +18,6 @@ if ($order_id === 0) {
     exit();
 }
 
-// Fetch order details
 $order      = null;
 $order_items = [];
 
@@ -41,7 +40,6 @@ try {
     $message_type = 'error';
 }
 
-// Handle payment submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_now'])) {
     $method = trim($_POST['payment_method'] ?? '');
 

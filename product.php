@@ -1,19 +1,11 @@
 <?php
-/**
- * Updated product.php using OOP concepts
- */
+
 
 session_start();
 require_once 'db_config.php';
 require_once 'product_class.php';
 require_once 'autoload.php';
 
-/** @var Product $product */
-
-// Guard against stale/orphaned sessions (e.g. user_id left in the session
-// after the database was reset or the account was deleted). Without this,
-// any insert that references users.id — like adding to cart — fails with
-// a foreign key constraint error (1452).
 if (isset($_SESSION['user_id'])) {
     $user_check_stmt = $conn->prepare("SELECT id FROM users WHERE id = ?");
     $user_check_stmt->execute([$_SESSION['user_id']]);
@@ -51,7 +43,6 @@ function validate_quantity(mixed $qty): int|false {
     return $qty;
 }
 
-// Handle add to cart (with optional variant)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
     if (!isset($_SESSION['user_id'])) {
         $message = 'Please login to add items to cart';
@@ -78,13 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
                     $message = 'Sorry, this product is currently out of stock';
                     $message_type = 'error';
                 } else {
-                    // Cap requested quantity to available stock (max 20 per order)
                     $max_order_qty = min($current_stock, 20);
                     if ($quantity > $max_order_qty) {
                         $quantity = $max_order_qty;
                     }
 
-                    // Check if item already exists in the user's cart
                     if ($variant_id === null) {
                         $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND variant_id IS NULL");
                         $stmt->execute([$user_id, $product_id]);
@@ -95,12 +84,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
                     $cart_item = $stmt->fetch(PDO::FETCH_ASSOC);
 
                     if ($cart_item) {
-                        // Already in cart: add to existing quantity but never exceed stock
                         $new_quantity = min($cart_item['quantity'] + $quantity, $current_stock);
                         $added        = $new_quantity - $cart_item['quantity'];
 
                         if ($added > 0) {
-                            // Deduct only the newly added units from stock
                             $conn->prepare("UPDATE cart SET quantity = ? WHERE id = ?")->execute([$new_quantity, $cart_item['id']]);
                             $conn->prepare("UPDATE products SET stock = stock - ? WHERE id = ?")->execute([$added, $product_id]);
                             $message = 'Product quantity updated in cart';
@@ -110,7 +97,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
                             $message_type = 'error';
                         }
                     } else {
-                        // New cart entry: deduct the full requested quantity from stock
                         $conn->prepare("INSERT INTO cart (user_id, product_id, variant_id, quantity) VALUES (?, ?, ?, ?)")->execute([$user_id, $product_id, $variant_id, $quantity]);
                         $conn->prepare("UPDATE products SET stock = stock - ? WHERE id = ?")->execute([$quantity, $product_id]);
                         $message = 'Product added to cart successfully';
@@ -128,7 +114,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
     }
 }
 
-// Fetch products and convert to OOP objects
 $productObjects = [];
 $variantsByProduct = [];
 
@@ -149,7 +134,6 @@ try {
         $productObjects[] = $product;
     }
 
-    // Fetch all variants grouped by product_id
     $variant_result = $conn->query("SELECT * FROM product_variants ORDER BY variant_price ASC");
     $variants_data = $variant_result->fetchAll(PDO::FETCH_ASSOC);
     foreach ($variants_data as $v) {
