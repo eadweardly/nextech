@@ -107,6 +107,7 @@ if (isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $show_signup ? 'Sign Up' : 'Login'; ?> - NEXTECH</title>
     <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -120,7 +121,7 @@ if (isset($_SESSION['user_id'])) {
                 <li><a href="login.php" class="nav-link active">Login</a></li>
                 <li><a href="cart.php" class="nav-link">Cart</a></li>
             </ul>
-            <div class="cart-icon">🛒</div>
+            <div class="cart-icon"><i class="bi bi-cart3"></i></div>
         </div>
     </nav>
 
@@ -191,7 +192,7 @@ if (isset($_SESSION['user_id'])) {
                             <label for="password" class="form-label">Password</label>
                             <div class="password-wrapper">
                                 <input type="password" id="password" name="password" required class="form-input" placeholder="••••••••">
-                                <button type="button" class="toggle-password" id="toggle-pwd">👁️</button>
+                                <button type="button" class="toggle-password" id="toggle-pwd"><i class="bi bi-eye"></i>️</button>
                             </div>
                         </div>
 
@@ -214,7 +215,7 @@ if (isset($_SESSION['user_id'])) {
                             Google
                         </button>
                         <button class="social-button apple" type="button">
-                            <span class="social-icon">🍎</span>
+                            <span class="social-icon"><i class="bi bi-apple"></i></span>
                             Apple
                         </button>
                     </div>
@@ -232,19 +233,19 @@ if (isset($_SESSION['user_id'])) {
                     <p>Sign in to access exclusive products, track orders, and enjoy personalized recommendations from our curated collection.</p>
                     <div class="feature-list">
                         <div class="feature-item">
-                            <span class="feature-icon">✓</span>
+                            <span class="feature-icon"><i class="bi bi-check-lg"></i></span>
                             <span>Fast & Secure Checkout</span>
                         </div>
                         <div class="feature-item">
-                            <span class="feature-icon">✓</span>
+                            <span class="feature-icon"><i class="bi bi-check-lg"></i></span>
                             <span>Order History & Tracking</span>
                         </div>
                         <div class="feature-item">
-                            <span class="feature-icon">✓</span>
+                            <span class="feature-icon"><i class="bi bi-check-lg"></i></span>
                             <span>Personalized Wishlist</span>
                         </div>
                         <div class="feature-item">
-                            <span class="feature-icon">✓</span>
+                            <span class="feature-icon"><i class="bi bi-check-lg"></i></span>
                             <span>Exclusive Deals & Offers</span>
                         </div>
                     </div>
@@ -303,10 +304,10 @@ if (isset($_SESSION['user_id'])) {
                 const passwordInput = document.getElementById('password');
                 if (passwordInput.type === 'password') {
                     passwordInput.type = 'text';
-                    this.textContent = '🙈';
+                    this.innerHTML = '<i class="bi bi-eye-slash"></i>';
                 } else {
                     passwordInput.type = 'password';
-                    this.textContent = '👁️';
+                    this.innerHTML = '<i class="bi bi-eye"></i>';
                 }
             });
         }

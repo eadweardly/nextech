@@ -116,6 +116,7 @@ $total    = $total_price + $shipping + $tax;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart - NEXTECH</title>
     <link rel="stylesheet" href="css/cart.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
@@ -131,7 +132,7 @@ $total    = $total_price + $shipping + $tax;
                 <li><a href="cart.php" class="nav-link active">Cart</a></li>
                 <li><a href="logout.php" class="nav-link">Logout (<?php echo htmlspecialchars($_SESSION['username']); ?>)</a></li>
             </ul>
-            <div class="cart-icon">🛒</div>
+            <div class="cart-icon"><i class="bi bi-cart3"></i></div>
         </div>
     </nav>
 
@@ -215,7 +216,7 @@ $total    = $total_price + $shipping + $tax;
 
             <?php else: ?>
                 <div class="empty-cart">
-                    <div class="empty-icon">🛒</div>
+                    <div class="empty-icon"><i class="bi bi-cart3"></i></div>
                     <h2>Your Cart is Empty</h2>
                     <p>Looks like you haven't added anything yet. Explore our premium collection!</p>
                     <a href="product.php" class="shop-now-btn">Start Shopping</a>

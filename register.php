@@ -58,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - NEXTECH</title>
     <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
@@ -71,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <li><a href="login.php" class="nav-link">Login</a></li>
                 <li><a href="register.php" class="nav-link active">Register</a></li>
             </ul>
-            <div class="cart-icon">🛒</div>
+            <div class="cart-icon"><i class="bi bi-cart3"></i></div>
         </div>
     </nav>
 
@@ -110,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="password-wrapper">
                             <input type="password" id="password" name="password" class="form-input"
                                    placeholder="••••••••" minlength="6" required>
-                            <button type="button" class="toggle-password" id="toggle-pwd">👁️</button>
+                            <button type="button" class="toggle-password" id="toggle-pwd"><i class="bi bi-eye"></i>️</button>
                         </div>
                         <small style="color: var(--text-secondary); font-size: 0.85rem;">Minimum 6 characters</small>
                     </div>
@@ -120,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="password-wrapper">
                             <input type="password" id="confirm_password" name="confirm_password" class="form-input"
                                    placeholder="••••••••" minlength="6" required>
-                            <button type="button" class="toggle-password" id="toggle-confirm-pwd">👁️</button>
+                            <button type="button" class="toggle-password" id="toggle-confirm-pwd"><i class="bi bi-eye"></i>️</button>
                         </div>
                     </div>
 
@@ -138,19 +139,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p>Create your NEXTECH account to access exclusive products, track your orders, and enjoy a personalized shopping experience.</p>
                     <div class="feature-list">
                         <div class="feature-item">
-                            <span class="feature-icon">✓</span>
+                            <span class="feature-icon"><i class="bi bi-check-lg"></i></span>
                             <span>Fast & Secure Checkout</span>
                         </div>
                         <div class="feature-item">
-                            <span class="feature-icon">✓</span>
+                            <span class="feature-icon"><i class="bi bi-check-lg"></i></span>
                             <span>Order History & Tracking</span>
                         </div>
                         <div class="feature-item">
-                            <span class="feature-icon">✓</span>
+                            <span class="feature-icon"><i class="bi bi-check-lg"></i></span>
                             <span>Exclusive Deals & Offers</span>
                         </div>
                         <div class="feature-item">
-                            <span class="feature-icon">✓</span>
+                            <span class="feature-icon"><i class="bi bi-check-lg"></i></span>
                             <span>Personalized Wishlist</span>
                         </div>
                     </div>
@@ -207,7 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             togglePwd.addEventListener('click', function () {
                 const input = document.getElementById('password');
                 input.type = input.type === 'password' ? 'text' : 'password';
-                this.textContent = input.type === 'password' ? '👁️' : '🙈';
+                this.innerHTML = input.type === 'password' ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
             });
         }
 
@@ -216,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             toggleConfirmPwd.addEventListener('click', function () {
                 const input = document.getElementById('confirm_password');
                 input.type = input.type === 'password' ? 'text' : 'password';
-                this.textContent = input.type === 'password' ? '👁️' : '🙈';
+                this.innerHTML = input.type === 'password' ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
             });
         }
 

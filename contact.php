@@ -159,6 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us - NEXTECH</title>
     <link rel="stylesheet" href="css/contact.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
@@ -180,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endif; ?>
             </ul>
             <div class="cart-icon">
-                <a href="<?php echo isset($_SESSION['user_id']) ? 'cart.php' : 'login.php'; ?>">🛒</a>
+                <a href="<?php echo isset($_SESSION['user_id']) ? 'cart.php' : 'login.php'; ?>"><i class="bi bi-cart3"></i></a>
             </div>
         </div>
     </nav>
@@ -205,17 +206,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Contact Info -->
             <div class="contact-info">
                 <div class="info-card">
-                    <div class="info-icon">📍</div>
+                    <div class="info-icon"><i class="bi bi-geo-alt-fill"></i></div>
                     <h3>Address</h3>
                     <p>123 Tech Avenue<br>San Francisco, CA 94105<br>United States</p>
                 </div>
                 <div class="info-card">
-                    <div class="info-icon">📞</div>
+                    <div class="info-icon"><i class="bi bi-telephone-fill"></i></div>
                     <h3>Phone</h3>
                     <p>+1 (555) 123-4567<br>Mon - Fri, 9am - 6pm PST<br>Closed on weekends</p>
                 </div>
                 <div class="info-card">
-                    <div class="info-icon">✉️</div>
+                    <div class="info-icon"><i class="bi bi-envelope-fill"></i>️</div>
                     <h3>Email</h3>
                     <p>support@nextech.com<br>sales@nextech.com<br>info@nextech.com</p>
                 </div>

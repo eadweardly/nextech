@@ -262,6 +262,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_now'])) {
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
@@ -275,7 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_now'])) {
                 <li><a href="cart.php" class="nav-link">Cart</a></li>
                 <li><a href="logout.php" class="nav-link">Logout (<?php echo htmlspecialchars($_SESSION['username']); ?>)</a></li>
             </ul>
-            <div class="cart-icon">🛒</div>
+            <div class="cart-icon"><i class="bi bi-cart3"></i></div>
         </div>
     </nav>
 
@@ -294,7 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_now'])) {
 
         <?php if ($payment_done): ?>
             <div class="success-box">
-                <div class="success-icon">✅</div>
+                <div class="success-icon"><i class="bi bi-check-circle-fill"></i></div>
                 <h2>Payment Successful!</h2>
                 <p>Thank you, <?php echo htmlspecialchars($_SESSION['username']); ?>! Your order has been placed.</p>
                 <p>Order #<?php echo $order_id; ?> is now being processed.</p>
@@ -339,23 +340,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_now'])) {
                     <div class="method-group">
                         <label class="method-option">
                             <input type="radio" name="payment_method" value="credit_card" required>
-                            <span>💳 Credit Card</span>
+                            <span><i class="bi bi-credit-card"></i> Credit Card</span>
                         </label>
                         <label class="method-option">
                             <input type="radio" name="payment_method" value="debit_card">
-                            <span>🏧 Debit Card</span>
+                            <span><i class="bi bi-bank"></i> Debit Card</span>
                         </label>
                         <label class="method-option">
                             <input type="radio" name="payment_method" value="gcash">
-                            <span>📱 GCash</span>
+                            <span><i class="bi bi-phone"></i> GCash</span>
                         </label>
                         <label class="method-option">
                             <input type="radio" name="payment_method" value="maya">
-                            <span>📱 Maya</span>
+                            <span><i class="bi bi-phone"></i> Maya</span>
                         </label>
                         <label class="method-option">
                             <input type="radio" name="payment_method" value="cod">
-                            <span>📦 Cash on Delivery</span>
+                            <span><i class="bi bi-box-seam"></i> Cash on Delivery</span>
                         </label>
                     </div>
                     <button type="submit" name="pay_now" class="pay-btn">Pay $<?php echo number_format($order['total'], 2); ?></button>

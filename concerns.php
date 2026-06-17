@@ -102,6 +102,7 @@ try {
             color: var(--text-secondary);
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
@@ -118,7 +119,7 @@ try {
                 <li><a href="logout.php" class="nav-link">Logout (<?php echo htmlspecialchars($_SESSION['username']); ?>)</a></li>
             </ul>
             <div class="cart-icon">
-                <a href="cart.php">🛒</a>
+                <a href="cart.php"><i class="bi bi-cart3"></i></a>
             </div>
         </div>
     </nav>
@@ -133,7 +134,7 @@ try {
 
             <div class="contact-info">
                 <div class="info-card">
-                    <span class="info-icon">📩</span>
+                    <span class="info-icon"><i class="bi bi-envelope-arrow-down"></i></span>
                     <h3>Your Submitted Concerns</h3>
                     <?php if (empty($concerns)): ?>
                         <p>You haven't submitted any concerns yet.</p>

@@ -91,6 +91,7 @@ $featured_products = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXTECH - Premium Tech Products</title>
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
@@ -102,19 +103,21 @@ $featured_products = [
                 <li><a href="index.php"   class="nav-link active">Home</a></li>
                 <li><a href="product.php" class="nav-link">Products</a></li>
                 <li><a href="contact.php" class="nav-link">Contact</a></li>
+                <li><a href="feedback.php" class="nav-link">Feedback</a></li>
+                <li><a href="concerns.php" class="nav-link">Concerns</a></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <?php if ($is_admin): ?>
                         <li><a href="admin.php" class="nav-link">Admin Panel</a></li>
                     <?php endif; ?>
                     <li class="nav-user">
-                        <span class="nav-username">👤 <?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                        <span class="nav-username"><i class="bi bi-person-circle"></i> <?php echo htmlspecialchars($_SESSION['username']); ?></span>
                         <a href="logout.php" class="nav-link nav-logout">Logout</a>
                     </li>
                 <?php else: ?>
                     <li><a href="login.php" class="nav-link">Login</a></li>
                 <?php endif; ?>
             </ul>
-            <div class="cart-icon">🛒</div>
+            <div class="cart-icon"><a href="<?php echo isset($_SESSION['user_id']) ? 'cart.php' : 'login.php'; ?>"><i class="bi bi-cart3"></i></a></div>
         </div>
     </nav>
 

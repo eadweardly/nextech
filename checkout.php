@@ -334,6 +334,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
@@ -349,7 +350,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 <li><a href="cart.php" class="nav-link">Cart</a></li>
                 <li><a href="logout.php" class="nav-link">Logout (<?php echo htmlspecialchars($_SESSION['username']); ?>)</a></li>
             </ul>
-            <div class="cart-icon">🛒</div>
+            <div class="cart-icon"><i class="bi bi-cart3"></i></div>
         </div>
     </nav>
 
@@ -457,7 +458,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
         <?php else: ?>
             <div class="empty-checkout">
-                <div class="empty-icon">🛒</div>
+                <div class="empty-icon"><i class="bi bi-cart3"></i></div>
                 <h2>No Items to Checkout</h2>
                 <p>Your cart is empty. Add some products first!</p>
                 <a href="product.php" class="shop-now-btn">Start Shopping</a>

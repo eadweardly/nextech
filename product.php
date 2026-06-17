@@ -288,6 +288,7 @@ try {
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
@@ -308,7 +309,7 @@ try {
                 <?php endif; ?>
             </ul>
             <div class="cart-icon">
-                <a href="<?php echo isset($_SESSION['user_id']) ? 'cart.php' : 'login.php'; ?>">🛒</a>
+                <a href="<?php echo isset($_SESSION['user_id']) ? 'cart.php' : 'login.php'; ?>"><i class="bi bi-cart3"></i></a>
             </div>
         </div>
     </nav>

@@ -119,6 +119,7 @@ try {
             font-size: 1.3rem;
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
@@ -135,7 +136,7 @@ try {
                 <li><a href="logout.php" class="nav-link">Logout (<?php echo htmlspecialchars($_SESSION['username']); ?>)</a></li>
             </ul>
             <div class="cart-icon">
-                <a href="cart.php">🛒</a>
+                <a href="cart.php"><i class="bi bi-cart3"></i></a>
             </div>
         </div>
     </nav>

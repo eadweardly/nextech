@@ -2,22 +2,16 @@
 session_start();
 require_once 'db_config.php';
 
-// ── Admin Guard ───────────────────────────────────────────────────────────────
-// OPTION A (recommended): Add `is_admin TINYINT(1) DEFAULT 0` to your users table
-//   and set it to 1 for admin accounts.
-// OPTION B (quick start): Hardcode admin usernames below.
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
-// Hardcoded admin usernames - add your own username to this list
 $admin_usernames = ['admin', 'nextech_admin', 'hihi']; // <- your username 'hihi' is included
 
 // Check admin status
 $is_admin = false;
 
-// Step 1: Try with is_admin column (if it exists in DB)
 try {
     $stmt = $conn->prepare("SELECT id, username, is_admin FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
@@ -30,7 +24,6 @@ try {
         }
     }
 } catch (PDOException $e) {
-    // Step 2: is_admin column doesn't exist - query without it
     try {
         $stmt = $conn->prepare("SELECT id, username FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
@@ -43,7 +36,6 @@ try {
     }
 }
 
-// Step 3: Final safety net - trust session username if DB checks above failed
 if (!$is_admin && !empty($_SESSION['username']) && in_array($_SESSION['username'], $admin_usernames)) {
     $is_admin = true;
 }
@@ -57,11 +49,6 @@ $active_tab = $_GET['tab'] ?? 'dashboard';
 $message    = '';
 $msg_type   = '';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// POST HANDLERS
-// ─────────────────────────────────────────────────────────────────────────────
-
-// ── Add Product ──────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
     $name        = trim($_POST['name'] ?? '');
     $description = trim($_POST['description'] ?? '');
@@ -87,7 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
     $active_tab = 'products';
 }
 
-// ── Edit Product ─────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product'])) {
     $id          = intval($_POST['product_id']);
     $name        = trim($_POST['name'] ?? '');
@@ -109,7 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product'])) {
     $active_tab = 'products';
 }
 
-// ── Delete Product ────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_product'])) {
     $id = intval($_POST['product_id']);
     try {
@@ -123,7 +108,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_product'])) {
     $active_tab = 'products';
 }
 
-// ── Update Order Status ───────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_order_status'])) {
     $order_id   = intval($_POST['order_id']);
     $new_status = $_POST['order_status'] ?? '';
@@ -141,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_order_status']
     $active_tab = 'orders';
 }
 
-// ── Update Concern Status ─────────────────────────────────────────────────────
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resolve_concern'])) {
     $concern_id = intval($_POST['concern_id']);
     try {
@@ -155,7 +139,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resolve_concern'])) {
     $active_tab = 'concerns';
 }
 
-// ── Delete User ───────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
     $uid = intval($_POST['user_id']);
     if ($uid === (int)$_SESSION['user_id']) {
@@ -174,11 +157,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
     $active_tab = 'users';
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DATA FETCHING
-// ─────────────────────────────────────────────────────────────────────────────
-
-// Dashboard stats
 $stats = ['users' => 0, 'products' => 0, 'orders' => 0, 'revenue' => 0, 'pending_orders' => 0, 'open_concerns' => 0];
 try {
     $stats['users']         = $conn->query("SELECT COUNT(*) FROM users")->fetchColumn();
@@ -189,49 +167,42 @@ try {
     $stats['open_concerns'] = $conn->query("SELECT COUNT(*) FROM concerns WHERE status='open'")->fetchColumn();
 } catch (PDOException $e) { /* silently skip */ }
 
-// Recent orders (for dashboard)
 $recent_orders = [];
 try {
     $recent_orders = $conn->query("SELECT o.id, o.status, o.total, o.created_at, u.username FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {}
 
-// Products
 $products = [];
 try {
     $products = $conn->query("SELECT * FROM products ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {}
 
-// Orders (full list)
 $orders = [];
 try {
     $orders = $conn->query("SELECT o.*, u.username, u.email FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {}
 
-// Users
 $users = [];
 try {
     $users = $conn->query("SELECT id, username, email, created_at FROM users ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {}
 
-// Payments
+
 $payments = [];
 try {
     $payments = $conn->query("SELECT p.*, u.username FROM payments p JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {}
 
-// Feedbacks
 $feedbacks = [];
 try {
     $feedbacks = $conn->query("SELECT f.*, u.username FROM feedbacks f JOIN users u ON f.user_id = u.id ORDER BY f.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {}
 
-// Concerns
 $concerns = [];
 try {
     $concerns = $conn->query("SELECT c.*, u.username FROM concerns c JOIN users u ON c.user_id = u.id ORDER BY c.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {}
 
-// Product for edit modal
 $edit_product = null;
 if (isset($_GET['edit_id'])) {
     try {
@@ -569,10 +540,11 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
         .modal-close:hover { color: var(--primary-grey); }
     </style>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
-<button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+<button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')"><i class="bi bi-list"></i></button>
 
 <!-- ── Sidebar ── -->
 <aside class="sidebar">
@@ -583,13 +555,13 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
     <nav class="sidebar-nav">
         <?php
         $tabs = [
-            'dashboard' => ['icon' => '📊', 'label' => 'Dashboard'],
-            'products'  => ['icon' => '📦', 'label' => 'Products'],
-            'orders'    => ['icon' => '🛒', 'label' => 'Orders'],
-            'users'     => ['icon' => '👥', 'label' => 'Users'],
-            'payments'  => ['icon' => '💳', 'label' => 'Payments'],
+            'dashboard' => ['icon' => '<i class="bi bi-bar-chart-fill"></i>', 'label' => 'Dashboard'],
+            'products'  => ['icon' => '<i class="bi bi-box-seam"></i>', 'label' => 'Products'],
+            'orders'    => ['icon' => '<i class="bi bi-cart3"></i>', 'label' => 'Orders'],
+            'users'     => ['icon' => '<i class="bi bi-people-fill"></i>', 'label' => 'Users'],
+            'payments'  => ['icon' => '<i class="bi bi-credit-card"></i>', 'label' => 'Payments'],
             'feedbacks' => ['icon' => '⭐', 'label' => 'Feedback'],
-            'concerns'  => ['icon' => '📩', 'label' => 'Concerns'],
+            'concerns'  => ['icon' => '<i class="bi bi-envelope-arrow-down"></i>', 'label' => 'Concerns'],
         ];
         foreach ($tabs as $key => $info):
         ?>
@@ -618,7 +590,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
 
     <?php if ($message): ?>
         <div class="toast <?php echo $msg_type; ?>">
-            <?php echo $msg_type === 'success' ? '✅' : '❌'; ?>
+            <?php echo $msg_type === 'success' ? '<i class="bi bi-check-circle-fill"></i>' : '<i class="bi bi-x-circle-fill"></i>'; ?>
             <?php echo htmlspecialchars($message); ?>
         </div>
     <?php endif; ?>
@@ -676,7 +648,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                     </tbody>
                 </table>
                 <?php else: ?>
-                    <div class="empty"><div class="icon">📋</div>No orders yet.</div>
+                    <div class="empty"><div class="icon"><i class="bi bi-clipboard-check"></i></div>No orders yet.</div>
                 <?php endif; ?>
             </div>
         </div>
@@ -758,7 +730,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                                 <?php if (!empty($p['image_url'])): ?>
                                     <img src="<?php echo htmlspecialchars($p['image_url']); ?>" class="img-thumb" alt="">
                                 <?php else: ?>
-                                    <div class="img-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">📦</div>
+                                    <div class="img-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;"><i class="bi bi-box-seam"></i></div>
                                 <?php endif; ?>
                             </td>
                             <td><strong><?php echo htmlspecialchars($p['name']); ?></strong></td>
@@ -787,7 +759,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                     </tbody>
                 </table>
                 <?php else: ?>
-                    <div class="empty"><div class="icon">📦</div>No products found. <a href="?tab=products&add=1">Add one now.</a></div>
+                    <div class="empty"><div class="icon"><i class="bi bi-box-seam"></i></div>No products found. <a href="?tab=products&add=1">Add one now.</a></div>
                 <?php endif; ?>
             </div>
         </div>
@@ -832,7 +804,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                     </tbody>
                 </table>
                 <?php else: ?>
-                    <div class="empty"><div class="icon">🛒</div>No orders yet.</div>
+                    <div class="empty"><div class="icon"><i class="bi bi-cart3"></i></div>No orders yet.</div>
                 <?php endif; ?>
             </div>
         </div>
@@ -876,7 +848,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                     </tbody>
                 </table>
                 <?php else: ?>
-                    <div class="empty"><div class="icon">👥</div>No users found.</div>
+                    <div class="empty"><div class="icon"><i class="bi bi-people-fill"></i></div>No users found.</div>
                 <?php endif; ?>
             </div>
         </div>
@@ -909,7 +881,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                     </tbody>
                 </table>
                 <?php else: ?>
-                    <div class="empty"><div class="icon">💳</div>No payments recorded yet.</div>
+                    <div class="empty"><div class="icon"><i class="bi bi-credit-card"></i></div>No payments recorded yet.</div>
                 <?php endif; ?>
             </div>
         </div>
@@ -975,7 +947,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                                 <?php if ($c['status'] === 'open'): ?>
                                     <form method="POST">
                                         <input type="hidden" name="concern_id" value="<?php echo $c['id']; ?>">
-                                        <button type="submit" name="resolve_concern" class="btn btn-success btn-sm">✓ Resolve</button>
+                                        <button type="submit" name="resolve_concern" class="btn btn-success btn-sm"><i class="bi bi-check-lg"></i> Resolve</button>
                                     </form>
                                 <?php else: ?>
                                     <span style="color:var(--muted);font-size:0.78rem;">Resolved</span>
@@ -986,7 +958,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                     </tbody>
                 </table>
                 <?php else: ?>
-                    <div class="empty"><div class="icon">📩</div>No concerns submitted yet.</div>
+                    <div class="empty"><div class="icon"><i class="bi bi-envelope-arrow-down"></i></div>No concerns submitted yet.</div>
                 <?php endif; ?>
             </div>
         </div>
