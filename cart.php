@@ -167,7 +167,7 @@ $total    = $total_price + $shipping + $tax;
                                     <?php endif; ?>
                                     <p><?php echo htmlspecialchars($item['description']); ?></p>
                                     <div class="item-meta">
-                                        <span class="item-price">$<?php echo number_format($effective_price, 2); ?></span>
+                                        <span class="item-price">₱<?php echo number_format($effective_price, 2); ?></span>
                                         <form method="POST" class="quantity-form">
                                             <input type="hidden" name="cart_id" value="<?php echo $item['id']; ?>">
                                             <label for="qty-<?php echo $item['id']; ?>">Qty:</label>
@@ -177,7 +177,7 @@ $total    = $total_price + $shipping + $tax;
                                     </div>
                                 </div>
                                 <div class="item-total">
-                                    <p>$<?php echo number_format($effective_price * $item['quantity'], 2); ?></p>
+                                    <p>₱<?php echo number_format($effective_price * $item['quantity'], 2); ?></p>
                                     <form method="POST" class="remove-form">
                                         <input type="hidden" name="cart_id" value="<?php echo $item['id']; ?>">
                                         <button type="submit" name="remove_item" class="remove-btn">Remove</button>
@@ -192,19 +192,19 @@ $total    = $total_price + $shipping + $tax;
                     <h3>Order Summary</h3>
                     <div class="summary-row">
                         <span>Subtotal</span>
-                        <span>$<?php echo number_format($total_price, 2); ?></span>
+                        <span>₱<?php echo number_format($total_price, 2); ?></span>
                     </div>
                     <div class="summary-row">
                         <span>Shipping</span>
-                        <span><?php echo $shipping == 0 ? 'Free' : '$' . number_format($shipping, 2); ?></span>
+                        <span><?php echo $shipping == 0 ? 'Free' : '₱' . number_format($shipping, 2); ?></span>
                     </div>
                     <div class="summary-row">
                         <span>Tax (8%)</span>
-                        <span>$<?php echo number_format($tax, 2); ?></span>
+                        <span>₱<?php echo number_format($tax, 2); ?></span>
                     </div>
                     <div class="summary-row total">
                         <span>Total</span>
-                        <span>$<?php echo number_format($total, 2); ?></span>
+                        <span>₱<?php echo number_format($total, 2); ?></span>
                     </div>
                     <a href="checkout.php" class="checkout-btn" style="display:block; text-align:center; text-decoration:none;">Proceed to Checkout</a>
                     <a href="product.php" class="continue-shopping">Continue Shopping</a>

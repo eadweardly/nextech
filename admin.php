@@ -298,7 +298,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
             </div>
             <div class="stat-card">
                 <div class="stat-label">Revenue</div>
-                <div class="stat-value">$<?php echo number_format($stats['revenue'], 2); ?></div>
+                <div class="stat-value">₱<?php echo number_format($stats['revenue'], 2); ?></div>
                 <div class="stat-sub">From completed payments</div>
             </div>
             <div class="stat-card">
@@ -319,7 +319,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                         <tr>
                             <td>#<?php echo $row['id']; ?></td>
                             <td><?php echo htmlspecialchars($row['username']); ?></td>
-                            <td>$<?php echo number_format($row['total'], 2); ?></td>
+                            <td>₱<?php echo number_format($row['total'], 2); ?></td>
                             <td><span class="badge badge-<?php echo htmlspecialchars($row['status']); ?>"><?php echo htmlspecialchars($row['status']); ?></span></td>
                             <td><?php echo date('M j, Y', strtotime($row['created_at'])); ?></td>
                         </tr>
@@ -355,7 +355,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                             <input type="text" name="name" class="form-input" value="<?php echo htmlspecialchars($edit_product['name'] ?? ''); ?>" required maxlength="150">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Price (USD) *</label>
+                            <label class="form-label">Price (PHP) *</label>
                             <input type="number" name="price" class="form-input" step="0.01" min="0.01" value="<?php echo htmlspecialchars($edit_product['price'] ?? ''); ?>" required>
                         </div>
                         <div class="form-group">
@@ -413,7 +413,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                             </td>
                             <td><strong><?php echo htmlspecialchars($p['name']); ?></strong></td>
                             <td><?php echo htmlspecialchars($p['category']); ?></td>
-                            <td>$<?php echo number_format($p['price'], 2); ?></td>
+                            <td>₱<?php echo number_format($p['price'], 2); ?></td>
                             <td><?php echo (int)$p['stock']; ?></td>
                             <td>
                                 <?php if ($p['stock'] > 0): ?>
@@ -459,10 +459,10 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                             <td>#<?php echo $o['id']; ?></td>
                             <td><?php echo htmlspecialchars($o['username']); ?></td>
                             <td style="color:var(--muted)"><?php echo htmlspecialchars($o['email']); ?></td>
-                            <td>$<?php echo number_format($o['subtotal'], 2); ?></td>
+                            <td>₱<?php echo number_format($o['subtotal'], 2); ?></td>
                             <td><?php echo $o['shipping'] == 0 ? 'Free' : '$'.number_format($o['shipping'],2); ?></td>
-                            <td>$<?php echo number_format($o['tax'], 2); ?></td>
-                            <td><strong>$<?php echo number_format($o['total'], 2); ?></strong></td>
+                            <td>₱<?php echo number_format($o['tax'], 2); ?></td>
+                            <td><strong>₱<?php echo number_format($o['total'], 2); ?></strong></td>
                             <td><span class="badge badge-<?php echo htmlspecialchars($o['status']); ?>"><?php echo htmlspecialchars($o['status']); ?></span></td>
                             <td><?php echo date('M j, Y', strtotime($o['created_at'])); ?></td>
                             <td>
@@ -546,7 +546,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                             <td><?php echo $pay['id']; ?></td>
                             <td><?php echo htmlspecialchars($pay['username']); ?></td>
                             <td>#<?php echo $pay['order_id']; ?></td>
-                            <td><strong>$<?php echo number_format($pay['amount'], 2); ?></strong></td>
+                            <td><strong>₱<?php echo number_format($pay['amount'], 2); ?></strong></td>
                             <td><?php echo htmlspecialchars(str_replace('_', ' ', $pay['method'])); ?></td>
                             <td><span class="badge badge-<?php echo htmlspecialchars($pay['status']); ?>"><?php echo htmlspecialchars($pay['status']); ?></span></td>
                             <td style="font-family:monospace;font-size:0.78rem;"><?php echo htmlspecialchars($pay['transaction_ref']); ?></td>

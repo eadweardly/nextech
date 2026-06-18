@@ -84,7 +84,7 @@ abstract class AbstractProduct implements Priceable {
     }
 
     public function getFormattedPrice(): string {
-        return '$' . number_format($this->price, 2);
+        return '₱' . number_format($this->price, 2);
     }
 
     public function getDiscountedPrice(): float {

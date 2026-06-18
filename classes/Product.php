@@ -154,7 +154,7 @@ class Product {
      * Returns formatted price with currency
      */
     public function getFormattedPrice(): string {
-        return '$' . number_format($this->price, 2);
+        return '₱' . number_format($this->price, 2);
     }
 
     /**

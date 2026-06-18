@@ -327,10 +327,10 @@ try {
                 <label for="price">Price Range</label>
                 <select id="price" class="filter-select">
                     <option value="">All Prices</option>
-                    <option value="0-100">Under $100</option>
-                    <option value="100-500">$100 - $500</option>
-                    <option value="500-1000">$500 - $1000</option>
-                    <option value="1000+">$1000+</option>
+                    <option value="0-100">Under ₱5,800</option>
+                    <option value="100-500">₱5,800 - ₱29,000</option>
+                    <option value="500-1000">₱29,000 - ₱58,000</option>
+                    <option value="1000+">₱58,000+</option>
                 </select>
             </div>
         </div>
@@ -405,7 +405,7 @@ try {
                                             <option value="">Standard — <?php echo $product->getFormattedPrice(); ?></option>
                                             <?php foreach ($variants as $v): ?>
                                                 <option value="<?php echo $v['id']; ?>">
-                                                    <?php echo htmlspecialchars($v['variant_description']); ?> — $<?php echo number_format($v['variant_price'], 2); ?>
+                                                    <?php echo htmlspecialchars($v['variant_description']); ?> — ₱<?php echo number_format($v['variant_price'], 2); ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>

@@ -373,7 +373,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                                 <?php endif; ?>
                                 <span class="order-item-qty">Qty: <?php echo $item['quantity']; ?> &times; $<?php echo number_format($effective_price, 2); ?></span>
                             </div>
-                            <span class="order-item-price">$<?php echo number_format($effective_price * $item['quantity'], 2); ?></span>
+                            <span class="order-item-price">₱<?php echo number_format($effective_price * $item['quantity'], 2); ?></span>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -426,19 +426,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                         <h3>Order Summary</h3>
                         <div class="summary-row">
                             <span>Subtotal</span>
-                            <span>$<?php echo number_format($subtotal, 2); ?></span>
+                            <span>₱<?php echo number_format($subtotal, 2); ?></span>
                         </div>
                         <div class="summary-row">
                             <span>Shipping</span>
-                            <span><?php echo $shipping == 0 ? 'Free' : '$' . number_format($shipping, 2); ?></span>
+                            <span><?php echo $shipping == 0 ? 'Free' : '₱' . number_format($shipping, 2); ?></span>
                         </div>
                         <div class="summary-row">
                             <span>Tax (8%)</span>
-                            <span>$<?php echo number_format($tax, 2); ?></span>
+                            <span>₱<?php echo number_format($tax, 2); ?></span>
                         </div>
                         <div class="summary-row total">
                             <span>Total</span>
-                            <span>$<?php echo number_format($total, 2); ?></span>
+                            <span>₱<?php echo number_format($total, 2); ?></span>
                         </div>
 
                         <button type="submit" name="place_order" class="place-order-btn">Place Order</button>

@@ -47,25 +47,25 @@ if (isset($_SESSION['user_id'])) {
 $featured_products = [
     [
         'name'        => 'NexView 32" 4K Ultra HD Display',
-        'price'       => '$499.99',
+        'price'       => '₱28,999.42',
         'image'       => 'images/monitor1.png',
         'description' => 'Ultra-wide 4K display with 144Hz refresh rate and HDR support for professionals.',
     ],
     [
         'name'        => 'NexHub Wireless 10-Port USB-C Hub',
-        'price'       => '$199.99',
+        'price'       => '₱11,599.42',
         'image'       => 'images/hub1.png',
         'description' => 'All-in-one 10-port USB-C hub with 100W power delivery and dual 4K output.',
     ],
     [
         'name'        => 'NexDock Pro 100W Docking Station',
-        'price'       => '$129.99',
+        'price'       => '₱7,539.42',
         'image'       => 'images/dock1.png',
         'description' => 'Wireless charging dock with 65W fast charge and multi-device support.',
     ],
     [
         'name'        => 'NexTrack AI Wireless Mouse',
-        'price'       => '$89.99',
+        'price'       => '₱5,219.42',
         'image'       => 'images/mouse1.png',
         'description' => 'Ergonomic wireless mouse with AI tracking technology, 26,000 DPI precision sensor, dual connectivity via 2.4GHz and Bluetooth 5.2, 6 programmable buttons, silent clicks, and 90-day battery life.',
     ],

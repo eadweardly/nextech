@@ -311,24 +311,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_now'])) {
                 <?php foreach ($order_items as $item): ?>
                     <div class="order-item-row">
                         <span><?php echo htmlspecialchars($item['product_name']); ?> x<?php echo $item['quantity']; ?></span>
-                        <span>$<?php echo number_format($item['line_total'], 2); ?></span>
+                        <span>₱<?php echo number_format($item['line_total'], 2); ?></span>
                     </div>
                 <?php endforeach; ?>
                 <div class="order-item-row">
                     <span>Subtotal</span>
-                    <span>$<?php echo number_format($order['subtotal'], 2); ?></span>
+                    <span>₱<?php echo number_format($order['subtotal'], 2); ?></span>
                 </div>
                 <div class="order-item-row">
                     <span>Shipping</span>
-                    <span><?php echo $order['shipping'] == 0 ? 'Free' : '$' . number_format($order['shipping'], 2); ?></span>
+                    <span><?php echo $order['shipping'] == 0 ? 'Free' : '₱' . number_format($order['shipping'], 2); ?></span>
                 </div>
                 <div class="order-item-row">
                     <span>Tax (8%)</span>
-                    <span>$<?php echo number_format($order['tax'], 2); ?></span>
+                    <span>₱<?php echo number_format($order['tax'], 2); ?></span>
                 </div>
                 <div class="order-item-row" style="font-weight:700; font-size:1rem; margin-top:0.5rem;">
                     <span>Total</span>
-                    <span>$<?php echo number_format($order['total'], 2); ?></span>
+                    <span>₱<?php echo number_format($order['total'], 2); ?></span>
                 </div>
             </div>
 

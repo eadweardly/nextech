@@ -34,7 +34,7 @@ class FeaturedProduct extends Product
 
     public function getFormattedDiscountedPrice(): string
     {
-        return '$' . number_format($this->getDiscountedPrice(), 2);
+        return '₱' . number_format($this->getDiscountedPrice(), 2);
     }
 
     public function hasDiscount(): bool
