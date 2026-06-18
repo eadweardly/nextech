@@ -190,26 +190,10 @@ if (isset($_SESSION['user_id'])) {
                         <div class="form-group checkbox-group">
                             <input type="checkbox" id="remember" name="remember" class="form-checkbox">
                             <label for="remember" class="checkbox-label">Remember me</label>
-                            <a href="#" class="forgot-password">Forgot Password?</a>
                         </div>
 
                         <button type="submit" name="login" class="login-button">Sign In</button>
                     </form>
-
-                    <div class="divider">
-                        <span>OR</span>
-                    </div>
-
-                    <div class="social-login">
-                        <button class="social-button google" type="button">
-                            <span class="social-icon">G</span>
-                            Google
-                        </button>
-                        <button class="social-button apple" type="button">
-                            <span class="social-icon"><i class="bi bi-apple"></i></span>
-                            Apple
-                        </button>
-                    </div>
 
                     <div class="signup-link">
                         <p>Don&apos;t have an account? <a href="?signup=true">Create one</a></p>
@@ -241,17 +225,7 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 </div>
                 <div class="visual-image">
-                    <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="300" height="400" fill="#f5f5f5"/>
-                        <rect x="50" y="100" width="200" height="200" fill="#333" rx="16"/>
-                        <rect x="70" y="120" width="160" height="160" fill="#555" rx="12"/>
-                        <circle cx="150" cy="200" r="30" fill="#1a1a1a"/>
-                        <g fill="#f5f5f5" opacity="0.3">
-                            <circle cx="100" cy="80" r="15"/>
-                            <circle cx="200" cy="320" r="20"/>
-                            <circle cx="80" cy="350" r="12"/>
-                        </g>
-                    </svg>
+                    <img src="images/logoz.png" alt="NEXTECH Logo" class="visual-logo">
                 </div>
             </div>
         </div>

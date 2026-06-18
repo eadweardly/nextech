@@ -233,9 +233,11 @@ body {
 }
 
 .checkbox-group {
+    display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: var(--spacing-sm);
 }
 
 .form-checkbox {
@@ -251,19 +253,6 @@ body {
     color: var(--text-secondary);
     cursor: pointer;
     font-size: 0.9rem;
-}
-
-.forgot-password {
-    color: var(--primary-grey);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.9rem;
-    transition: var(--transition);
-}
-
-.forgot-password:hover {
-    opacity: 0.7;
-    text-decoration: underline;
 }
 
 .login-button {
@@ -286,61 +275,6 @@ body {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
-/* ============================================
-   DIVIDER
-   ============================================ */
-
-.divider {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    margin: var(--spacing-lg) 0;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-
-.divider::before,
-.divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background-color: var(--border-grey);
-}
-
-/* ============================================
-   SOCIAL LOGIN
-   ============================================ */
-
-.social-login {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-md);
-}
-
-.social-button {
-    padding: var(--spacing-md) var(--spacing-lg);
-    border: 1px solid var(--border-grey);
-    background-color: var(--primary-white);
-    color: var(--text-primary);
-    border-radius: var(--radius);
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-}
-
-.social-button:hover {
-    border-color: var(--primary-grey);
-    background-color: var(--light-grey);
-}
-
-.social-icon {
-    font-size: 1rem;
-}
 
 /* ============================================
    SIGNUP LINK
@@ -475,10 +409,11 @@ body {
     min-height: 300px;
 }
 
-.visual-image svg {
+.visual-logo {
     width: 100%;
+    max-width: 280px;
     height: auto;
-    max-width: 250px;
+    object-fit: contain;
 }
 
 /* ============================================
@@ -572,9 +507,7 @@ body {
         min-height: 250px;
     }
 
-    .social-login {
-        grid-template-columns: 1fr;
-    }
+
 }
 
 @media (max-width: 480px) {
@@ -740,12 +673,6 @@ body {
                 0 2px 8px rgba(26,26,26,0.08);
 }
 
-/* Social buttons — icon scale on hover */
-.social-button:hover .social-icon {
-    transform: scale(1.2);
-    display: inline-block;
-    transition: transform 0.2s ease;
-}
 
 /* Footer top accent */
 .footer {
