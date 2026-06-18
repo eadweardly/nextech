@@ -189,7 +189,7 @@ try {
 
 $payments = [];
 try {
-    $payments = $conn->query("SELECT p.*, u.username FROM payments p JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+    $payments = $conn->query("SELECT p.*, u.username FROM payments p JOIN users u ON p.user_id = u.id ORDER BY p.paid_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {}
 
 $feedbacks = [];
@@ -550,7 +550,7 @@ $categories = ['PC Components & GPUs', 'Laptops & Monitors', 'Gaming Peripherals
                             <td><?php echo htmlspecialchars(str_replace('_', ' ', $pay['method'])); ?></td>
                             <td><span class="badge badge-<?php echo htmlspecialchars($pay['status']); ?>"><?php echo htmlspecialchars($pay['status']); ?></span></td>
                             <td style="font-family:monospace;font-size:0.78rem;"><?php echo htmlspecialchars($pay['transaction_ref']); ?></td>
-                            <td><?php echo date('M j, Y', strtotime($pay['created_at'])); ?></td>
+                            <td><?php echo date('M j, Y', strtotime($pay['paid_at'])); ?></td>>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
